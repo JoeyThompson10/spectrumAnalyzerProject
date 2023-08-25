@@ -1,3 +1,4 @@
+#Group 8
 # Import necessary libraries
 import cv2  # OpenCV library for computer vision
 import numpy as np  # NumPy library for numerical operations
