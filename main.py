@@ -131,7 +131,7 @@ def main():
                     print(f"Center Frequency: {center_freq}")
                     print(f"Minimum Amplitude: {min_amplitude}")
                     print(f"Maximum Amplitude: {max_amplitude}")
-                    print(f"Center Amplitude: {center_amplitude}")
+                    print(f"Center Amplitude: {center_amplitude}\n")
 
             # Display the cropped frame with the wave
             cv2.imshow('Video', cropped_frame)
