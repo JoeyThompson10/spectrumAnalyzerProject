@@ -15,6 +15,7 @@
 import cv2
 import numpy as np
 from scipy.optimize import curve_fit
+import csv
 
 # User-configurable constants
 # RGB lower and upper bounds to identify the "screen" region
@@ -104,7 +105,7 @@ def main():
     print(f"Playing video with dimensions: {frame_width}x{frame_height} and {fps} FPS.")
 
     # Initialize some variables
-    peak_counter = 0
+    detected_signals = []
 
     # Main video processing loop
     while cap.isOpened():
@@ -125,9 +126,8 @@ def main():
 
             # If a wave was successfully processed
             if result:
-                peak_counter += 1
-                if peak_counter % (fps * 3) == 0:
-                    print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
+                print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
+                detected_signals.append(result)  # Store detected signal information
 
             cv2.imshow('Video', mask)
         else:
@@ -135,6 +135,17 @@ def main():
 
         if cv2.waitKey(1000 // fps) & 0xFF == ord(QUIT_KEY):
             break
+
+    # Save the detected signal information to a CSV file
+    csv_file = 'detected_signals.csv'
+    with open(csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Timestamp (s)', 'Center Frequency', 'Minimum Amplitude', 'Maximum Amplitude', 'Center Amplitude'])
+        for signal in detected_signals:
+            frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - len(detected_signals) + detected_signals.index(signal)
+            timestamp = frame_number / fps
+            center_freq, min_amplitude, max_amplitude, center_amplitude = signal
+            writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
 
     cap.release()
     cv2.destroyAllWindows()
