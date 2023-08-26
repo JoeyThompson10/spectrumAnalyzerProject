@@ -27,8 +27,8 @@ UPPER_WAVE_COLOR = np.array([102, 260, 260])
 
 # Kernel size and dilation/erosion iterations for image filtering
 KERNEL_SIZE = np.ones((5, 5), np.uint8)
-DILATE_ITERATIONS = 2
-ERODE_ITERATIONS = 2
+DILATE_ITERATIONS = 1
+ERODE_ITERATIONS = 1
 
 # File path to the video to analyze
 VIDEO_PATH = 'CW Signal.mp4'
