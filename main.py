@@ -1,156 +1,155 @@
-#Group 8
-# Import necessary libraries
-import cv2  # OpenCV library for computer vision
-import numpy as np  # NumPy library for numerical operations
-from scipy.optimize import curve_fit  # SciPy function for curve fitting
+# ==============================================================================
+# SWE 4724- Software Engineering Project
+# Instructor: Dr. Yan Huang
+# Group: 8
+# Members:
+#     - Masood Afzal
+#     - Ashly Altman
+#     - Brooke Ebetino
+#     - Tyler Halley
+#     - Joey Thompson
+# Project Title: Spectrum Analyzer Analysis Tool
+# Client: 402 SWEG
+# ==============================================================================
 
+import cv2
+import numpy as np
+from scipy.optimize import curve_fit
 
-# Define a function representing a parabola to fit wave data
+# User-configurable constants
+# RGB lower and upper bounds to identify the "screen" region
+LOWER_GREEN = np.array([33, 45, 45])
+UPPER_GREEN = np.array([92, 260, 260])
+
+# RGB lower and upper bounds to identify the "wave" region
+LOWER_WAVE_COLOR = np.array([78, 145, 115])
+UPPER_WAVE_COLOR = np.array([102, 260, 260])
+
+# Kernel size and dilation/erosion iterations for image filtering
+KERNEL_SIZE = np.ones((5, 5), np.uint8)
+DILATE_ITERATIONS = 2
+ERODE_ITERATIONS = 2
+
+# File path to the video to analyze
+VIDEO_PATH = 'CW Signal.mp4'
+
+# Key to quit the video playback
+QUIT_KEY = 'q'
+
+# Define a parabolic function for curve fitting
 def parabola(x, a, b, c):
-    return a * x ** 2 + b * x + c  # Equation of a parabola
+    """Defines a parabolic function."""
+    return a * x ** 2 + b * x + c
 
-
-# Function to find the oscilloscope screen based on its green color
-def find_screen(frame):
-    # Convert the color frame from BGR to HSV color space
+# Apply a color filter based on RGB lower and upper bounds
+def apply_color_filter(frame, lower_bound, upper_bound):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower_bound, upper_bound)
+    return mask
 
-    # Define the range of green color in HSV
-    lower_green = np.array([35, 50, 50])
-    upper_green = np.array([90, 255, 255])
-
-    # Create a binary mask where green color is "1" and others are "0"
-    mask = cv2.inRange(hsv, lower_green, upper_green)
-
-    # Find contours in the mask
+# Find and return the largest contour in a given binary mask
+def find_largest_contour(mask):
     contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    return max(contours, key=cv2.contourArea) if contours else None
 
-    # Return None if no contour is found
-    if not contours:
+# Identify the screen area within a video frame based on its color
+def find_screen(frame):
+    mask = apply_color_filter(frame, LOWER_GREEN, UPPER_GREEN)
+    largest_contour = find_largest_contour(mask)
+    
+    if largest_contour is not None and largest_contour.size > 0:
+        return cv2.boundingRect(largest_contour)
+    else:
         return None
 
-    # Find the largest contour by area
-    largest_contour = max(contours, key=cv2.contourArea)
-
-    # Get the bounding rectangle of the largest contour
-    return cv2.boundingRect(largest_contour)
-
-
-# Function to find the wave pixels in the frame
+# Find and process the wave within a video frame
 def find_wave(frame):
-    # Convert the frame to HSV
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    mask = apply_color_filter(frame, LOWER_WAVE_COLOR, UPPER_WAVE_COLOR)
+    largest_contour = find_largest_contour(mask)
 
-    # Define the color range for the wave (cyan-ish color)
-    lower_bound = np.array([80, 150, 120])
-    upper_bound = np.array([100, 255, 255])
+    if largest_contour is not None and largest_contour.size > 0:
+        mask = np.zeros_like(mask)
+        cv2.drawContours(mask, [largest_contour], -1, (255), thickness=cv2.FILLED)
+        
+        # Connect nearby contours by dilating and then eroding
+        mask = cv2.dilate(mask, KERNEL_SIZE, iterations=DILATE_ITERATIONS)
+        mask = cv2.erode(mask, KERNEL_SIZE, iterations=ERODE_ITERATIONS)
 
-    # Create a binary mask
-    mask = cv2.inRange(hsv, lower_bound, upper_bound)
+    return mask, np.where(mask)
 
-    # Find coordinates of the wave
-    return np.where(mask)
-
-
-# Function to process the wave and extract relevant information
+# Analyze and extract wave characteristics
 def process_wave(wave_x, wave_y):
-    # If both wave_x and wave_y are not empty
     if len(wave_x) > 0 and len(wave_y) > 0:
-        # Fit the points to a parabola
         params, _ = curve_fit(parabola, wave_x, wave_y)
-
-        # Extract the coefficients of the fitted parabola
         a, b, c = params
 
-        # Calculate center frequency using vertex formula (-b / 2a)
+        # Calculate various wave characteristics
         center_freq = -b / (2 * a)
-
-        # Calculate amplitudes
-        min_amplitude = np.min(wave_y)
-        max_amplitude = np.max(wave_y)
+        min_amplitude, max_amplitude = np.min(wave_y), np.max(wave_y)
         center_amplitude = (max_amplitude + min_amplitude) / 2
-
         return center_freq, min_amplitude, max_amplitude, center_amplitude
-
     return None
 
-
-# Main function where video processing happens
+# Main execution function
 def main():
-    # File path to the video
-    video_path = 'CW Signal.mp4'
+    # Initialization and video metadata fetching
+    video_path = VIDEO_PATH
     cap = cv2.VideoCapture(video_path)
-
-    # Check if video was opened successfully
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return
 
-    # Get video properties
-    frame_width = int(cap.get(3))
-    frame_height = int(cap.get(4))
+    frame_width, frame_height = int(cap.get(3)), int(cap.get(4))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
-
     print(f"Playing video with dimensions: {frame_width}x{frame_height} and {fps} FPS.")
 
-    peak_counter = 0  # Initialize peak counter to 0
+    # Initialize some variables
+    peak_counter = 0
 
-    # Loop through video frames
+    # Main video processing loop
     while cap.isOpened():
-        # Read a frame from the video
         ret, frame = cap.read()
-
-        # Get current frame number and calculate timestamp
-        frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        timestamp = frame_number / fps  # Timestamp in seconds
-
-        # Break loop if video ends
         if not ret:
             print("Reached the end of the video or an error occurred.")
             break
 
-        # Find oscilloscope screen in the frame
+        # Detect screen and wave regions
         screen_info = find_screen(frame)
-
-        # If screen is found
         if screen_info:
-            x, y, w, h = screen_info  # Extract position and size
-            # Crop the frame to only contain the oscilloscope screen
+            x, y, w, h = screen_info
             cropped_frame = frame[y:y + h, x:x + w]
-
-            # Find wave in the cropped frame
-            wave_x, wave_y = find_wave(cropped_frame)
-
-            # Process the wave to get frequency and amplitude
+            mask, (wave_x, wave_y) = find_wave(cropped_frame)
             result = process_wave(wave_x, wave_y)
 
-            if result:  # If wave data is successfully processed
-                peak_counter += 1  # Increment peak counter
-                if peak_counter % (fps * 3) == 0:  # Log data every 3 seconds
-                    center_freq, min_amplitude, max_amplitude, center_amplitude = result
-                    print(f"Timestamp: {timestamp} seconds")
-                    print(f"Center Frequency: {center_freq}")
-                    print(f"Minimum Amplitude: {min_amplitude}")
-                    print(f"Maximum Amplitude: {max_amplitude}")
-                    print(f"Center Amplitude: {center_amplitude}\n")
+            # Additional stabilization logic can be added here
 
-            # Display the cropped frame with the wave
-            cv2.imshow('Video', cropped_frame)
+            # If a wave was successfully processed
+            if result:
+                peak_counter += 1
+                if peak_counter % (fps * 3) == 0:
+                    print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
+
+            cv2.imshow('Video', mask)
         else:
-            # Display the original frame if screen is not found
             cv2.imshow('Video', frame)
 
-        # Break loop if 'q' is pressed
-        if cv2.waitKey(1000 // fps) & 0xFF == ord('q'):
+        if cv2.waitKey(1000 // fps) & 0xFF == ord(QUIT_KEY):
             break
 
-    # Release video and destroy all OpenCV windows
     cap.release()
     cv2.destroyAllWindows()
-
     print("Video playback is done.")
 
+# Function to print extracted wave characteristics
+def print_wave_characteristics(result, frame_number, fps):
+    timestamp = frame_number / fps
+    center_freq, min_amplitude, max_amplitude, center_amplitude = result
+    print(f"Timestamp: {timestamp} seconds")
+    print(f"Center Frequency: {center_freq}")
+    print(f"Minimum Amplitude: {min_amplitude}")
+    print(f"Maximum Amplitude: {max_amplitude}")
+    print(f"Center Amplitude: {center_amplitude}\n")
 
-# Run the main function when the script is executed
+# Entry point of the script
 if __name__ == "__main__":
     main()
