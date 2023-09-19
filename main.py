@@ -16,8 +16,6 @@
 # Import necessary libraries
 # ===================================
 import cv2
-import numpy as np
-from scipy.optimize import curve_fit
 import csv
 import utilities
 import env_vars
@@ -84,9 +82,10 @@ def main():
             if result:
                 print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
                 detected_signals.append(result)
+            
+            if mask is not None:
                 # Show the cropped frame with the wave to the user
                 cv2.imshow('Video', mask)
-
             else:
                 # If screen is not detected, simply show the entire frame
                 cv2.imshow('Video', frame)

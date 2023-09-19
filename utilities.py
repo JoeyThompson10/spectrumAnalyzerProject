@@ -23,16 +23,6 @@ class Utilities:
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         return max(contours, key=cv2.contourArea) if contours else None
 
-    def find_screen(frame):
-        """Identify the screen area within a video frame based on its color."""
-        mask = Utilities.apply_color_filter(frame, env_vars.Env_Vars.LOWER_GREEN, env_vars.Env_Vars.UPPER_GREEN)
-        largest_contour = Utilities.find_largest_contour(mask)
-        
-        if largest_contour is not None and largest_contour.size > 0:
-            return cv2.boundingRect(largest_contour)
-        else:
-            return None
-
     def find_wave(frame):
         """Find and process the wave within a video frame."""
         mask = Utilities.apply_color_filter(frame, env_vars.Env_Vars.LOWER_WAVE_COLOR, env_vars.Env_Vars.UPPER_WAVE_COLOR)
