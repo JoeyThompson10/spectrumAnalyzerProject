@@ -1,12 +1,3 @@
-# Import necessary libraries
-import cv2  # OpenCV library for computer vision
-import numpy as np  # NumPy library for numerical operations
-from scipy.optimize import curve_fit  # SciPy function for curve fitting
-import screen
-import wave_1
-
-
-=======
 # ==============================================================================
 # SWE 4724- Software Engineering Project
 # Instructor: Dr. Yan Huang
@@ -110,7 +101,6 @@ def process_wave(wave_x, wave_y):
 # 4. Main execution functions
 # ===================================
 
-
 def print_wave_characteristics(result, frame_number, fps):
     """Print extracted wave characteristics."""
     timestamp = frame_number / fps
@@ -141,35 +131,10 @@ def main():
         if not ret:
             break
 
-
-        # Find oscilloscope screen in the frame
-        screen_info = screen.Screen.find_screen(frame)
-
-        # If screen is found
         screen_info = find_screen(frame)
         if screen_info:
             x, y, w, h = screen_info
             cropped_frame = frame[y:y + h, x:x + w]
-
-            # Find wave in the cropped frame
-            wave_x, wave_y = wave_1.Wave.find_wave(cropped_frame)
-
-            # Process the wave to get frequency and amplitude
-            result =  wave_1.Wave.process_wave(wave_x, wave_y)
-
-            if result:  # If wave data is successfully processed
-                peak_counter += 1  # Increment peak counter
-                if peak_counter % (fps * 3) == 0:  # Log data every 3 seconds
-                    center_freq, min_amplitude, max_amplitude, center_amplitude = result
-                    print(f"Timestamp: {timestamp} seconds")
-                    print(f"Center Frequency: {center_freq} MHZ")
-                    print(f"Minimum Amplitude: {min_amplitude} MHZ")
-                    print(f"Maximum Amplitude: {max_amplitude} MHZ")
-                    print(f"Center Amplitude: {center_amplitude} MHZ\n")
-
-            # Display the cropped frame with the wave
-            cv2.imshow('Video', cropped_frame)
-=======
             mask, (wave_x, wave_y) = find_wave(cropped_frame)
             result = process_wave(wave_x, wave_y)
 
