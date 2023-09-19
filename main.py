@@ -58,16 +58,6 @@ def find_largest_contour(mask):
     contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     return max(contours, key=cv2.contourArea) if contours else None
 
-def find_screen(frame):
-    """Identify the screen area within a video frame based on its color."""
-    mask = apply_color_filter(frame, LOWER_GREEN, UPPER_GREEN)
-    largest_contour = find_largest_contour(mask)
-    
-    if largest_contour is not None and largest_contour.size > 0:
-        return cv2.boundingRect(largest_contour)
-    else:
-        return None
-
 def find_wave(frame):
     """Find and process the wave within a video frame."""
     mask = apply_color_filter(frame, LOWER_WAVE_COLOR, UPPER_WAVE_COLOR)
@@ -135,14 +125,9 @@ def main():
         if not ret:
             break
 
-        # Find the screen area in the current frame
-        screen_info = find_screen(frame)
-        if screen_info:
-            # Extract the region of interest from the frame
-            x, y, w, h = screen_info
-            cropped_frame = frame[y:y + h, x:x + w]
+        if frame is not None:
             # Process and identify the wave from the cropped frame
-            mask, (wave_x, wave_y) = find_wave(cropped_frame)
+            mask, (wave_x, wave_y) = find_wave(frame)
             # Get detailed information from the processed wave
             result = process_wave(wave_x, wave_y)
             
