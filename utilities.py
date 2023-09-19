@@ -1,13 +1,13 @@
 import cv2
+import csv
 import numpy as np
 from scipy.optimize import curve_fit
 import env_vars
 
-class Utilities:
 # ===================================
 # Utility functions
 # ===================================
-
+class Utilities:
     def parabola(x, a, b, c):
         """Defines a parabolic function."""
         return a * x ** 2 + b * x + c
@@ -61,3 +61,16 @@ class Utilities:
         print(f"Minimum Amplitude: {min_amplitude}")
         print(f"Maximum Amplitude: {max_amplitude}")
         print(f"Center Amplitude: {center_amplitude}\n")
+
+    def store_to_csv(detected_signals, cap, fps):
+        # Store detected signals' information to a CSV file
+        csv_file = 'detected_signals.csv'
+        with open(csv_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            # Define the CSV columns
+            writer.writerow(['Timestamp (s)', 'Center Frequency', 'Minimum Amplitude', 'Maximum Amplitude', 'Center Amplitude'])
+            for signal in detected_signals:
+                frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - len(detected_signals) + detected_signals.index(signal)
+                timestamp = frame_number / fps
+                center_freq, min_amplitude, max_amplitude, center_amplitude = signal
+                writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
