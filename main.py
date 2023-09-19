@@ -13,7 +13,7 @@
 # ==============================================================================
 
 # ===================================
-# Import necessary libraries
+# Imports
 # ===================================
 import cv2
 import csv
@@ -23,26 +23,6 @@ import env_vars
 # ===================================
 #  Main execution functions
 # ===================================
-
-def print_wave_characteristics(result, frame_number, fps):
-    """Print extracted wave characteristics to the console."""
-    timestamp = frame_number / fps
-    center_freq, min_amplitude, max_amplitude, center_amplitude = result
-    print(f"Timestamp: {timestamp} seconds")
-    print(f"Center Frequency: {center_freq}")
-    print(f"Minimum Amplitude: {min_amplitude}")
-    print(f"Maximum Amplitude: {max_amplitude}")
-    print(f"Center Amplitude: {center_amplitude}\n")
-
-def print_wave_characteristics(result, frame_number, fps):
-    """Print extracted wave characteristics to the console."""
-    timestamp = frame_number / fps
-    center_freq, min_amplitude, max_amplitude, center_amplitude = result
-    print(f"Timestamp: {timestamp} seconds")
-    print(f"Center Frequency: {center_freq}")
-    print(f"Minimum Amplitude: {min_amplitude}")
-    print(f"Maximum Amplitude: {max_amplitude}")
-    print(f"Center Amplitude: {center_amplitude}\n")
 
 def main():
     """Main execution function for analyzing the video."""
@@ -80,7 +60,7 @@ def main():
             
             # If a valid result is obtained, print and store it
             if result:
-                print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
+                utilities.Utilities.print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
                 detected_signals.append(result)
             
             if mask is not None:

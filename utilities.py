@@ -4,8 +4,8 @@ from scipy.optimize import curve_fit
 import env_vars
 
 class Utilities:
-    # ===================================
-# 3. Define utility functions
+# ===================================
+# Utility functions
 # ===================================
 
     def parabola(x, a, b, c):
@@ -38,7 +38,6 @@ class Utilities:
 
         return mask, np.where(mask)
 
-
     def process_wave(wave_x, wave_y):
         """Analyze and extract wave characteristics."""
         if wave_x.size > 0 and wave_y.size > 0:
@@ -52,3 +51,13 @@ class Utilities:
             return center_freq, min_amplitude, max_amplitude, center_amplitude
         return None
     pass
+
+    def print_wave_characteristics(result, frame_number, fps):
+        """Print extracted wave characteristics to the console."""
+        timestamp = frame_number / fps
+        center_freq, min_amplitude, max_amplitude, center_amplitude = result
+        print(f"Timestamp: {timestamp} seconds")
+        print(f"Center Frequency: {center_freq}")
+        print(f"Minimum Amplitude: {min_amplitude}")
+        print(f"Maximum Amplitude: {max_amplitude}")
+        print(f"Center Amplitude: {center_amplitude}\n")
