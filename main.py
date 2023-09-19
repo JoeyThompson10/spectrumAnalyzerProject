@@ -102,7 +102,7 @@ def process_wave(wave_x, wave_y):
 # ===================================
 
 def print_wave_characteristics(result, frame_number, fps):
-    """Print extracted wave characteristics."""
+    """Print extracted wave characteristics to the console."""
     timestamp = frame_number / fps
     center_freq, min_amplitude, max_amplitude, center_amplitude = result
     print(f"Timestamp: {timestamp} seconds")
@@ -112,46 +112,59 @@ def print_wave_characteristics(result, frame_number, fps):
     print(f"Center Amplitude: {center_amplitude}\n")
 
 def main():
-    """Main execution function."""
-    # Video setup
+    """Main execution function for analyzing the video."""
+    # Open the video file for processing
     cap = cv2.VideoCapture(VIDEO_PATH)
+    # Check if the video file opened successfully
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return
 
+    # Get video properties like width, height, and FPS
     frame_width, frame_height = int(cap.get(3)), int(cap.get(4))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     print(f"Playing video with dimensions: {frame_width}x{frame_height} and {fps} FPS.")
 
+    # List to store detected signals' information
     detected_signals = []
 
-    # Main video processing loop
+    # Main loop to process each frame in the video
     while cap.isOpened():
         ret, frame = cap.read()
+        # If there's no more frame to read, exit the loop
         if not ret:
             break
 
+        # Find the screen area in the current frame
         screen_info = find_screen(frame)
         if screen_info:
+            # Extract the region of interest from the frame
             x, y, w, h = screen_info
             cropped_frame = frame[y:y + h, x:x + w]
+            # Process and identify the wave from the cropped frame
             mask, (wave_x, wave_y) = find_wave(cropped_frame)
+            # Get detailed information from the processed wave
             result = process_wave(wave_x, wave_y)
-
+            
+            # If a valid result is obtained, print and store it
             if result:
                 print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
                 detected_signals.append(result)
+            # Show the cropped frame with the wave to the user
             cv2.imshow('Video', mask)
         else:
+            # If screen is not detected, simply show the entire frame
             cv2.imshow('Video', frame)
 
+        # Allow for user intervention to quit video playback
         if cv2.waitKey(1000 // fps) & 0xFF == ord(QUIT_KEY):
             break
 
-    # Save results to CSV
+    # Store detected signals' information to a CSV file
     csv_file = 'detected_signals.csv'
     with open(csv_file, mode='w', newline='') as file:
         writer = csv.writer(file)
+        # Define the CSV columns
         writer.writerow(['Timestamp (s)', 'Center Frequency', 'Minimum Amplitude', 'Maximum Amplitude', 'Center Amplitude'])
         for signal in detected_signals:
             frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - len(detected_signals) + detected_signals.index(signal)
@@ -159,6 +172,7 @@ def main():
             center_freq, min_amplitude, max_amplitude, center_amplitude = signal
             writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
 
+    # Properly release the video and close any GUI windows
     cap.release()
     cv2.destroyAllWindows()
     print("Video playback is done.")
