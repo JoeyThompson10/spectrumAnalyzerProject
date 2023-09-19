@@ -25,21 +25,26 @@ import env_vars
 # ===================================
 
 def main():
+    """Main execution function for analyzing the video."""
+    # Open the video file for processing
     cap = cv2.VideoCapture(env_vars.Env_Vars.VIDEO_PATH)
-
+    # Check if the video file opened successfully
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return
-    
+
+    # Get video properties like width, height, and FPS
     frame_width, frame_height = int(cap.get(3)), int(cap.get(4))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     print(f"Playing video with dimensions: {frame_width}x{frame_height} and {fps} FPS.")
 
+    # List to store detected signals' information
     detected_signals = []
 
+    # Main loop to process each frame in the video
     while cap.isOpened():
         ret, frame = cap.read()
-        
+        # If there's no more frame to read, exit the loop
         if not ret:
             break
 
@@ -49,6 +54,7 @@ def main():
         # mask will be None if no wave is detected
         mask, (wave_x, wave_y) = utilities.Utilities.find_wave(frame)
         
+        # Get detailed information from the processed wave
         result = utilities.Utilities.process_wave(wave_x, wave_y)
         
         # If a valid result is obtained, print and store it
@@ -68,7 +74,6 @@ def main():
             break
 
     utilities.Utilities.store_to_csv(detected_signals, cap, fps)
-
     # Properly release the video and close any GUI windows
     cap.release()
     cv2.destroyAllWindows()
