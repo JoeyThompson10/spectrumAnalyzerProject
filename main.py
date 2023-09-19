@@ -126,8 +126,12 @@ def main():
             break
 
         if frame is not None:
-            # Process and identify the wave from the cropped frame
+            # Process and identify the wave from the frame using color filtering and contour detection
+            # mask will be displayed to the user to show the detected wave
+            # wave_x and wave_y will be used to extract wave characteristics
+            # mask will be None if no wave is detected
             mask, (wave_x, wave_y) = find_wave(frame)
+            
             # Get detailed information from the processed wave
             result = process_wave(wave_x, wave_y)
             
@@ -135,11 +139,12 @@ def main():
             if result:
                 print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
                 detected_signals.append(result)
-            # Show the cropped frame with the wave to the user
-            cv2.imshow('Video', mask)
-        else:
-            # If screen is not detected, simply show the entire frame
-            cv2.imshow('Video', frame)
+                # Show the cropped frame with the wave to the user
+                cv2.imshow('Video', mask)
+
+            else:
+                # If screen is not detected, simply show the entire frame
+                cv2.imshow('Video', frame)
 
         # Allow for user intervention to quit video playback
         if cv2.waitKey(1000 // fps) & 0xFF == ord(QUIT_KEY):
