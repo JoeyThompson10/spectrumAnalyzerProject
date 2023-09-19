@@ -83,7 +83,7 @@ def find_wave(frame):
 
     return mask, np.where(mask)
 
-
+#Need to rework this function to return the correct values
 def process_wave(wave_x, wave_y):
     """Analyze and extract wave characteristics."""
     if wave_x.size > 0 and wave_y.size > 0:
