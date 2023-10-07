@@ -44,10 +44,10 @@ class Utilities:
         if wave_x.size > 0 and wave_y.size > 0:
             params, _ = curve_fit(Utilities.parabola, wave_x, wave_y)
             a, b, c = params
-
+            
             # Calculate various wave characteristics
             center_freq = -b / (2 * a)
-            min_amplitude, max_amplitude = np.min(wave_y), np.max(wave_y)
+            min_amplitude, max_amplitude = ((np.min(wave_y))), (np.max(wave_y)/14.5)
             center_amplitude = (max_amplitude + min_amplitude) / 2
             return center_freq, min_amplitude, max_amplitude, center_amplitude
         return None
