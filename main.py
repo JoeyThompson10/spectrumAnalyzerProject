@@ -27,22 +27,24 @@ import env_vars
 def print_wave_characteristics(result, frame_number, fps):
     """Print extracted wave characteristics."""
     timestamp = frame_number / fps
-    center_freq, min_amplitude, max_amplitude, center_amplitude = result
+    # center_freq, min_amplitude, max_amplitude, center_amplitude = result
+    max_amplitude = result
     print(f"Timestamp: {timestamp} seconds")
-    print(f"Center Frequency: {center_freq}")
-    print(f"Minimum Amplitude: {min_amplitude}")
+    # print(f"Center Frequency: {center_freq}")
+    # print(f"Minimum Amplitude: {min_amplitude}")
     print(f"Maximum Amplitude: {max_amplitude}")
-    print(f"Center Amplitude: {center_amplitude}\n")
+    # print(f"Center Amplitude: {center_amplitude}\n")
 
 def print_wave_characteristics(result, frame_number, fps):
     """Print extracted wave characteristics to the console."""
     timestamp = frame_number / fps
-    center_freq, min_amplitude, max_amplitude, center_amplitude = result
+    # center_freq, min_amplitude, max_amplitude, center_amplitude = result
+    max_amplitude = result
     print(f"Timestamp: {timestamp} seconds")
-    print(f"Center Frequency: {center_freq}")
-    print(f"Minimum Amplitude: {min_amplitude}")
+    # print(f"Center Frequency: {center_freq}")
+    # print(f"Minimum Amplitude: {min_amplitude}")
     print(f"Maximum Amplitude: {max_amplitude}")
-    print(f"Center Amplitude: {center_amplitude}\n")
+    # print(f"Center Amplitude: {center_amplitude}\n")
 
 def main():
     """Main execution function for analyzing the video."""
@@ -76,7 +78,8 @@ def main():
             mask, (wave_x, wave_y) = utilities.Utilities.find_wave(frame)
             
             # Get detailed information from the processed wave
-            result = utilities.Utilities.process_wave(wave_x, wave_y)
+            result = utilities.Utilities.process_wave(frame, mask, wave_x, wave_y)
+
             
             # If a valid result is obtained, print and store it
             if result:

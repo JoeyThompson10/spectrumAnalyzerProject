@@ -39,16 +39,37 @@ class Utilities:
         return mask, np.where(mask)
 
 
-    def process_wave(wave_x, wave_y):
+    def process_wave(frame, mask, wave_x, wave_y):
         """Analyze and extract wave characteristics."""
         if wave_x.size > 0 and wave_y.size > 0:
-            params, _ = curve_fit(Utilities.parabola, wave_x, wave_y)
+            params, _  = curve_fit(Utilities.parabola, wave_x, wave_y)
             a, b, c = params
-            
             # Calculate various wave characteristics
             center_freq = -b / (2 * a)
-            min_amplitude, max_amplitude = ((np.min(wave_y))), (np.max(wave_y)/14.5)
+            min_amplitude, max_amplitude = (np.min(wave_y)), (Utilities.getPixtoDb(Utilities.get_mask_height(mask)))
             center_amplitude = (max_amplitude + min_amplitude) / 2
-            return center_freq, min_amplitude, max_amplitude, center_amplitude
+            # return center_freq, min_amplitude, max_amplitude, center_amplitude
+            return max_amplitude
         return None
-    pass
+
+    def get_mask_height(mask):
+        # Find the row indices of non-zero pixels in the mask
+        non_zero_rows = np.where(mask)[0]
+
+        if non_zero_rows.size > 0:
+            # Calculate the minimum and maximum row indices to find the height
+            min_row = np.min(non_zero_rows)
+            max_row = np.max(non_zero_rows)
+
+            # Calculate the height as the difference between max and min rows
+            height = max_row - min_row + 1  # Adding 1 to account for inclusive row indices
+            return height
+        else:
+            # If there are no non-zero pixels, return 0 as the height
+            return 0
+        
+
+    def getPixtoDb(amplitude):
+
+        ratio=270/70
+        return (amplitude/ratio)

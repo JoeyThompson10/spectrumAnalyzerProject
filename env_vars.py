@@ -13,6 +13,6 @@ class Env_Vars:
     ERODE_ITERATIONS = 1
 
     # Video configuration
-    VIDEO_PATH = 'CW Signal.mp4'
+    VIDEO_PATH = 'Pulsed Signal.mp4'
     QUIT_KEY = 'q'
 pass
