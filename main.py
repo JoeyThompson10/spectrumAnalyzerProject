@@ -1,7 +1,7 @@
 # ==============================================================================
 # SWE 4724- Software Engineering Project
 # Instructor: Dr. Yan Huang
-# Group: 8
+# Team: 5
 # Members:
 #     - Masood Afzal
 #     - Ashly Altman
@@ -26,17 +26,6 @@ import env_vars
 
 def print_wave_characteristics(result, frame_number, fps):
     """Print extracted wave characteristics."""
-    timestamp = frame_number / fps
-    # center_freq, min_amplitude, max_amplitude, center_amplitude = result
-    max_amplitude = result
-    print(f"Timestamp: {timestamp} seconds")
-    # print(f"Center Frequency: {center_freq}")
-    # print(f"Minimum Amplitude: {min_amplitude}")
-    print(f"Maximum Amplitude: {max_amplitude}")
-    # print(f"Center Amplitude: {center_amplitude}\n")
-
-def print_wave_characteristics(result, frame_number, fps):
-    """Print extracted wave characteristics to the console."""
     timestamp = frame_number / fps
     # center_freq, min_amplitude, max_amplitude, center_amplitude = result
     max_amplitude = result
