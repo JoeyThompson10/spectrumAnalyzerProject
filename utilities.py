@@ -45,11 +45,11 @@ class Utilities:
             params, _  = curve_fit(Utilities.parabola, wave_x, wave_y)
             a, b, c = params
             # Calculate various wave characteristics
-            center_freq = -b / (2 * a)
+            center_freq = 1
             min_amplitude, max_amplitude = (np.min(wave_y)), (Utilities.getPixtoDb(Utilities.get_mask_height(mask)))
-            center_amplitude = (max_amplitude + min_amplitude) / 2
-            # return center_freq, min_amplitude, max_amplitude, center_amplitude
-            return max_amplitude
+            center_amplitude = 0
+            return center_freq, min_amplitude, max_amplitude, center_amplitude
+            # return max_amplitude
         return None
 
     def get_mask_height(mask):
