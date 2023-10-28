@@ -1,12 +1,42 @@
 import cv2
 import numpy as np
 from scipy.optimize import curve_fit
-import env_vars
+import env_vars 
+
 
 class Utilities:
     # ===================================
 # 3. Define utility functions
 # ===================================
+
+   
+
+    
+    def findGrid(frame):
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, env_vars.Env_Vars.LOWER_GRID_COLOR, env_vars.Env_Vars.UPPER_GRID_COLOR)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))      
+        green_grid = cv2.bitwise_and(frame, frame, mask=mask)
+        gray = cv2.cvtColor(green_grid, cv2.COLOR_BGR2GRAY)
+        low_threshold = 10
+        high_threshold = 500
+        edges =cv2.Canny(gray, low_threshold,high_threshold) 
+        contours, _= cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        return contours
+    def getPixtoDb(wave_height, frame, span):
+        contours = Utilities.findGrid(frame)
+
+        for contour in contours:
+            perimeter = cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, 0.02*perimeter, True)
+            if len(approx)==4:
+                x, y, w, h = cv2.boundingRect(approx)
+                if(h > 50):
+                    gridheight = 10*h
+        dbPxHeight = (gridheight)/span
+        wave_amplitude = wave_height/dbPxHeight
+        return wave_amplitude
 
     def parabola(x, a, b, c):
         """Defines a parabolic function."""
@@ -39,18 +69,18 @@ class Utilities:
         return mask, np.where(mask)
 
 
-    def process_wave(frame, mask, wave_x, wave_y):
+    def process_wave(frame, mask, span):
         """Analyze and extract wave characteristics."""
-        if wave_x.size > 0 and wave_y.size > 0:
-            params, _  = curve_fit(Utilities.parabola, wave_x, wave_y)
-            a, b, c = params
+        # if wave_x.size > 0 and wave_y.size > 0:
+        #     params, _  = curve_fit(Utilities.parabola, wave_x, wave_y)
+        #     a, b, c = params
             # Calculate various wave characteristics
-            center_freq = 1
-            min_amplitude, max_amplitude = (np.min(wave_y)), (Utilities.getPixtoDb(Utilities.get_mask_height(mask)))
-            center_amplitude = 0
-            return center_freq, min_amplitude, max_amplitude, center_amplitude
-            # return max_amplitude
-        return None
+        center_freq = 1
+        min_amplitude, max_amplitude = (np.min(Utilities.getPixtoDb(Utilities.get_mask_height(mask), frame, span))), (Utilities.getPixtoDb(Utilities.get_mask_height(mask), frame, span))
+        center_amplitude = 0
+        return center_freq, min_amplitude, max_amplitude, center_amplitude
+
+
 
     def get_mask_height(mask):
         # Find the row indices of non-zero pixels in the mask
@@ -69,7 +99,4 @@ class Utilities:
             return 0
         
 
-    def getPixtoDb(amplitude):
-
-        ratio=270/70
-        return (amplitude/ratio)
+   
