@@ -19,6 +19,7 @@ import cv2
 import csv
 import utilities
 import env_vars
+import numpy as np
 
 # ===================================
 #  Main execution functions
@@ -44,6 +45,14 @@ def main():
         print("Error: Could not open the video file.")
         return
 
+    # Get first frame of the video
+    ret0, first_frame = cap.read()
+    if not ret0:
+        print("Unable to read first frame")
+        exit()
+
+    utilities.Utilities.findGrid(first_frame)
+
     # Get video properties like width, height, and FPS
     frame_width, frame_height = int(cap.get(3)), int(cap.get(4))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -51,7 +60,6 @@ def main():
 
     # List to store detected signals' information
     detected_signals = []
-
     # Main loop to process each frame in the video
     while cap.isOpened():
         ret, frame = cap.read()
@@ -65,22 +73,34 @@ def main():
             # wave_x and wave_y will be used to extract wave characteristics
             # mask will be None if no wave is detected
             mask, (wave_x, wave_y) = utilities.Utilities.find_wave(frame)
-            
-            # Get detailed information from the processed wave
-            result = utilities.Utilities.process_wave(frame, mask, wave_x, wave_y)
+            utilities.Utilities.findGrid(first_frame)
 
-            
+            span = 100
+            # Get detailed information from the processed wave
+            result = utilities.Utilities.process_wave(frame, mask, span)
+
+          
             # If a valid result is obtained, print and store it
             if result:
                 print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
                 detected_signals.append(result)
             
-            if mask is not None:
-                # Show the cropped frame with the wave to the user
-                cv2.imshow('Video', mask)
-            else:
-                # If screen is not detected, simply show the entire frame
-                cv2.imshow('Video', frame)
+            # if mask is not None:
+            #     # Show the cropped frame with the wave to the user
+            #     cv2.imshow('Video', mask)
+                
+            # else:
+            # If screen is not detected, simply show the entire frame
+            contours = utilities.Utilities.findGrid(frame)
+            for contour in contours:
+                perimeter = cv2.arcLength(contour, True)
+                approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+
+                # Check if the contour has 4 vertices (a rectangle)
+                if len(approx) == 4:
+                    x, y, w, h = cv2.boundingRect(approx)
+            cv2.imshow('Video', frame)
+
 
         # Allow for user intervention to quit video playback
         if cv2.waitKey(1000 // fps) & 0xFF == ord(env_vars.Env_Vars.QUIT_KEY):

@@ -7,6 +7,9 @@ class Env_Vars:
     LOWER_WAVE_COLOR = np.array([78, 145, 115])
     UPPER_WAVE_COLOR = np.array([102, 260, 260])
 
+    LOWER_GRID_COLOR = np.array([31, 41, 41])
+    UPPER_GRID_COLOR = np.array([78, 145, 115])
+
     # Image filtering parameters
     KERNEL_SIZE = np.ones((5, 5), np.uint8)
     DILATE_ITERATIONS = 1
