@@ -24,16 +24,7 @@ class Utilities:
         contours, _= cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         return contours
-    def getPixtoDb(wave_height, frame, span):
-        contours = Utilities.findGrid(frame)
-
-        for contour in contours:
-            perimeter = cv2.arcLength(contour, True)
-            approx = cv2.approxPolyDP(contour, 0.02*perimeter, True)
-            if len(approx)==4:
-                x, y, w, h = cv2.boundingRect(approx)
-                if(h > 50):
-                    gridheight = 10*h
+    def getPixtoDb(wave_height, span, gridheight): 
         dbPxHeight = (gridheight)/span
         wave_amplitude = wave_height/dbPxHeight
         return wave_amplitude
@@ -69,16 +60,19 @@ class Utilities:
         return mask, np.where(mask)
 
 
-    def process_wave(frame, mask, span):
+    def process_wave(frame, mask, span, gridheight):
         """Analyze and extract wave characteristics."""
         # if wave_x.size > 0 and wave_y.size > 0:
         #     params, _  = curve_fit(Utilities.parabola, wave_x, wave_y)
         #     a, b, c = params
             # Calculate various wave characteristics
         center_freq = 1
-        min_amplitude, max_amplitude = (np.min(Utilities.getPixtoDb(Utilities.get_mask_height(mask), frame, span))), (Utilities.getPixtoDb(Utilities.get_mask_height(mask), frame, span))
+        mask_height = Utilities.get_mask_height(mask) #pixel height of the mask
+        amplitude = Utilities.getPixtoDb(mask_height, span, gridheight)
+        min_amplitude = amplitude
+        max_amplitude = amplitude
         center_amplitude = 0
-        return center_freq, min_amplitude, max_amplitude, center_amplitude
+        return max_amplitude
 
 
 

@@ -25,18 +25,21 @@ import numpy as np
 #  Main execution functions
 # ===================================
 
-def print_wave_characteristics(result, frame_number, fps):
+def print_wave_characteristics(result, frame_number, fps, gridheight):
     """Print extracted wave characteristics."""
     timestamp = frame_number / fps
     # center_freq, min_amplitude, max_amplitude, center_amplitude = result
     max_amplitude = result
     print(f"Timestamp: {timestamp} seconds")
+    print(f"Gridheight: {gridheight}")
     # print(f"Center Frequency: {center_freq}")
     # print(f"Minimum Amplitude: {min_amplitude}")
     print(f"Maximum Amplitude: {max_amplitude}")
     # print(f"Center Amplitude: {center_amplitude}\n")
 
 def main():
+    span_input = input("Enter Span: ")
+    span = int(span_input)
     """Main execution function for analyzing the video."""
     # Open the video file for processing
     cap = cv2.VideoCapture(env_vars.Env_Vars.VIDEO_PATH)
@@ -57,6 +60,8 @@ def main():
     frame_width, frame_height = int(cap.get(3)), int(cap.get(4))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     print(f"Playing video with dimensions: {frame_width}x{frame_height} and {fps} FPS.")
+    rect_cnt = 0
+    gridheight = 0
 
     # List to store detected signals' information
     detected_signals = []
@@ -73,33 +78,36 @@ def main():
             # wave_x and wave_y will be used to extract wave characteristics
             # mask will be None if no wave is detected
             mask, (wave_x, wave_y) = utilities.Utilities.find_wave(frame)
-            utilities.Utilities.findGrid(first_frame)
+            while(rect_cnt <= 10):
+                contours = utilities.Utilities.findGrid(frame)
+                for contour in contours:
+                    perimeter = cv2.arcLength(contour, True)
+                    approx = cv2.approxPolyDP(contour, 0.02*perimeter, True)
+                    if len(approx)==4:
+                        x, y, w, h = cv2.boundingRect(approx)
+                        if(h > 50 & h < 100):
+                            if(rect_cnt <= 10):
+                                gridheight+=h
+                                rect_cnt +=1
+                
+                           
 
-            span = 100
             # Get detailed information from the processed wave
-            result = utilities.Utilities.process_wave(frame, mask, span)
+            result = utilities.Utilities.process_wave(frame, mask, span, gridheight)
 
           
             # If a valid result is obtained, print and store it
             if result:
-                print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps)
+                print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
                 detected_signals.append(result)
             
-            # if mask is not None:
-            #     # Show the cropped frame with the wave to the user
-            #     cv2.imshow('Video', mask)
+            if mask is not None:
+                # Show the cropped frame with the wave to the user
+                cv2.imshow('Video', mask)
                 
-            # else:
+            else:
             # If screen is not detected, simply show the entire frame
-            contours = utilities.Utilities.findGrid(frame)
-            for contour in contours:
-                perimeter = cv2.arcLength(contour, True)
-                approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
-
-                # Check if the contour has 4 vertices (a rectangle)
-                if len(approx) == 4:
-                    x, y, w, h = cv2.boundingRect(approx)
-            cv2.imshow('Video', frame)
+                cv2.imshow('Video', frame)
 
 
         # Allow for user intervention to quit video playback
