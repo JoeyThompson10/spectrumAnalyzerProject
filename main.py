@@ -25,24 +25,11 @@ import numpy as np
 #  Main execution functions
 # ===================================
 
-def print_wave_characteristics(result, frame_number, fps, gridheight):
-    """Print extracted wave characteristics."""
-    timestamp = frame_number / fps
-    # center_freq, min_amplitude, max_amplitude, center_amplitude = result
-    max_amplitude = result
-    print(f"Timestamp: {timestamp} seconds")
-    print(f"Gridheight: {gridheight}")
-    # print(f"Center Frequency: {center_freq}")
-    # print(f"Minimum Amplitude: {min_amplitude}")
-    print(f"Maximum Amplitude: {max_amplitude}")
-    # print(f"Center Amplitude: {center_amplitude}\n")
-
-def main():
+def video_to_csv(cap):
     span_input = input("Enter Span: ")
     span = int(span_input)
     """Main execution function for analyzing the video."""
     # Open the video file for processing
-    cap = cv2.VideoCapture(env_vars.Env_Vars.VIDEO_PATH)
     # Check if the video file opened successfully
     if not cap.isOpened():
         print("Error: Could not open the video file.")
@@ -98,7 +85,7 @@ def main():
           
             # If a valid result is obtained, print and store it
             if result:
-                print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
+                utilities.Utilities.print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
                 detected_signals.append(result)
             
             if mask is not None:
@@ -130,6 +117,10 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
     print("Video playback is done.")
+
+def main():
+    cap = cv2.VideoCapture(env_vars.Env_Vars.VIDEO_PATH)
+    video_to_csv(cap)
 
 # ===================================
 # 5. Script entry point
