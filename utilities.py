@@ -122,10 +122,10 @@ class Utilities:
         """Print extracted wave characteristics."""
         timestamp = frame_number / fps
         # center_freq, min_amplitude, max_amplitude, center_amplitude = result
-        max_amplitude = result
+        center_freq, min_amplitude, max_amplitude, center_amplitude = result
         print(f"Timestamp: {timestamp} seconds")
         print(f"Gridheight: {gridheight}")
-        # print(f"Center Frequency: {center_freq}")
-        # print(f"Minimum Amplitude: {min_amplitude}")
+        print(f"Center Frequency: {center_freq}")
+        print(f"Minimum Amplitude: {min_amplitude}")
         print(f"Maximum Amplitude: {max_amplitude}")
-        # print(f"Center Amplitude: {center_amplitude}\n")
+        print(f"Center Amplitude: {center_amplitude}\n")
