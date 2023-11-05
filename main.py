@@ -20,13 +20,14 @@ import cv2
 import csv
 import utilities
 import env_vars
+from datetime import datetime
 from time import sleep
 
 # ===================================
 #  Main execution functions
 # ===================================
 
-def video_to_csv(cap):
+def video_to_csv(cap, fileName):
     span = env_vars.Env_Vars.SPAN
     """Main execution function for analyzing the video."""
     # Open the video file for processing
@@ -104,7 +105,7 @@ def video_to_csv(cap):
             break
 
     # Store detected signals' information to a CSV file
-    csv_file = 'detected_signals.csv'
+    csv_file = fileName + ".csv"
     with open(csv_file, mode='w', newline='') as file:
         writer = csv.writer(file)
         # Define the CSV columns
@@ -125,7 +126,10 @@ def video_to_csv(cap):
 
 def process_video_file(video_file):
     cap = cv2.VideoCapture(video_file)
-    video_to_csv(cap)
+    fileName = os.path.basename(video_file)
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    fileName = current_time + "_CSV_" + fileName
+    video_to_csv(cap, fileName)
 
 def main():
     # Specify the folder containing the videos
