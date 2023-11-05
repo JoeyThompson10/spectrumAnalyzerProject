@@ -18,5 +18,7 @@ class Env_Vars:
 
     # Video configuration
     VIDEO_PATH = 'Videos/CW Signal.mp4'
+    VIDEO_FOLDER = 'Videos'
+
     QUIT_KEY = 'q'
 pass

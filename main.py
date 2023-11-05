@@ -15,10 +15,12 @@
 # ===================================
 # Import necessary libraries
 # ===================================
+import os
 import cv2
 import csv
 import utilities
 import env_vars
+from time import sleep
 
 # ===================================
 #  Main execution functions
@@ -31,12 +33,14 @@ def video_to_csv(cap):
     # Check if the video file opened successfully
     if not cap.isOpened():
         print("Error: Could not open the video file.")
+        sleep(5)
         return
 
     # Get first frame of the video
     ret0, first_frame = cap.read()
     if not ret0:
         print("Unable to read first frame")
+        sleep(5)
         exit()
 
     utilities.Utilities.findGrid(first_frame)
@@ -119,9 +123,34 @@ def video_to_csv(cap):
     cv2.destroyAllWindows()
     print("Video playback is done.")
 
-def main():
-    cap = cv2.VideoCapture(env_vars.Env_Vars.VIDEO_PATH)
+def process_video_file(video_file):
+    cap = cv2.VideoCapture(video_file)
     video_to_csv(cap)
+
+def main():
+    # Specify the folder containing the videos
+    video_folder_path = env_vars.Env_Vars.VIDEO_FOLDER
+    
+    # Check if the folder exists
+    if not os.path.exists(video_folder_path):
+        print("The specified folder does not exist: " + video_folder_path)
+        sleep(5)
+        return
+    
+    # List all files in the video folder
+    video_files = [f for f in os.listdir(video_folder_path) if f.endswith('.mp4')]
+    
+    # Check if there are any mp4 files in the folder
+    if not video_files:
+        print("No videos found in " + video_folder_path + ".")
+        sleep(5)
+        return
+    
+    # Process each video file
+    for video_file in video_files:
+        full_video_path = os.path.join(video_folder_path, video_file)
+        print("Processing video: " + full_video_path)
+        process_video_file(full_video_path)
 
 # ===================================
 # 5. Script entry point
