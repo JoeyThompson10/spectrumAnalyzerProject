@@ -68,6 +68,7 @@ def video_to_csv(cap, fileName):
             # wave_x and wave_y will be used to extract wave characteristics
             # mask will be None if no wave is detected
             mask, (wave_x, wave_y) = utilities.Utilities.find_wave(frame)
+
             while(rect_cnt <= 10):
                 contours = utilities.Utilities.findGrid(frame)
                 for contour in contours:
@@ -83,7 +84,7 @@ def video_to_csv(cap, fileName):
                            
 
             # Get detailed information from the processed wave
-            result = utilities.Utilities.process_wave(frame, mask, span, gridheight)
+            result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y)
 
           
             # If a valid result is obtained, print and store it
