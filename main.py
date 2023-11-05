@@ -19,7 +19,6 @@ import cv2
 import csv
 import utilities
 import env_vars
-import numpy as np
 
 # ===================================
 #  Main execution functions
@@ -109,8 +108,11 @@ def video_to_csv(cap):
         for signal in detected_signals:
             frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - len(detected_signals) + detected_signals.index(signal)
             timestamp = frame_number / fps
-            center_freq, min_amplitude, max_amplitude, center_amplitude = signal
-            writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
+            
+            # center_freq, min_amplitude, max_amplitude, center_amplitude = signal
+            # writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
+            max_amplitude = signal
+            writer.writerow([timestamp, max_amplitude])
 
     # Properly release the video and close any GUI windows
     cap.release()
