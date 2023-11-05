@@ -106,18 +106,30 @@ def video_to_csv(cap, fileName):
 
     # Store detected signals' information to a CSV file
     csv_file = fileName + ".csv"
-    with open(csv_file, mode='w', newline='') as file:
+
+
+    # Check if the Completed folder exists, if not, create it
+    completed_directory = 'Completed'
+    if not os.path.exists(completed_directory):
+        os.makedirs(completed_directory)
+    csvLocation = os.path.join(completed_directory, csv_file)
+
+
+    csvLocation = os.path.join('Completed', csv_file) 
+    with open(csvLocation, mode='w', newline='') as file:
         writer = csv.writer(file)
         # Define the CSV columns
         writer.writerow(['Timestamp (s)', 'Center Frequency', 'Minimum Amplitude', 'Maximum Amplitude', 'Center Amplitude'])
         for signal in detected_signals:
             frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - len(detected_signals) + detected_signals.index(signal)
             timestamp = frame_number / fps
-            
+
             # center_freq, min_amplitude, max_amplitude, center_amplitude = signal
-            # writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
             max_amplitude = signal
+
+            # writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
             writer.writerow([timestamp, max_amplitude])
+            
 
     # Properly release the video and close any GUI windows
     cap.release()
