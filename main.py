@@ -26,8 +26,7 @@ import numpy as np
 # ===================================
 
 def video_to_csv(cap):
-    span_input = input("Enter Span: ")
-    span = int(span_input)
+    span = env_vars.Env_Vars.SPAN
     """Main execution function for analyzing the video."""
     # Open the video file for processing
     # Check if the video file opened successfully
