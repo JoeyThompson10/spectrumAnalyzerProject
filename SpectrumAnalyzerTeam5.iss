@@ -2,15 +2,15 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SpectrumAnalyzerTeam5"
-#define MyAppVersion "1.5"
-#define MyAppPublisher "Team  5"
-#define MyAppURL "https://main.d21hsol1os28ah.amplifyapp.com"
+#define MyAppVersion "1.6"
+#define MyAppPublisher "Kennesaw State University SWE 4724 Team 5"
+#define MyAppURL "https://main.d21hsol1os28ah.amplifyapp.com/"
 #define MyAppExeName "main.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{0B7AA6BB-0D79-4946-B4E9-A24ECCCC6DD4}
+AppId={{68232D74-93A5-4BB4-859B-3CD99767F882}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -35,8 +35,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\JoeyT\Documents\GitHub\spectrumAnalyzerProject\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\JoeyT\Documents\GitHub\spectrumAnalyzerProject\Videos\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Dirs]
+Name: "{app}\Videos";
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
