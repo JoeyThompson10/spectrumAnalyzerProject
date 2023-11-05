@@ -1,24 +1,26 @@
 import cv2
 import numpy as np
 from scipy.optimize import curve_fit
-import env_vars 
+import env_vars
 
 
 class Utilities:
-    # ===================================
-# 3. Define utility functions
-# ===================================
-
+    """Utility functions for the spectrum analyzer."""
     def findGrid(frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, env_vars.Env_Vars.LOWER_GRID_COLOR, env_vars.Env_Vars.UPPER_GRID_COLOR)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))      
+        mask = cv2.inRange(
+            hsv, env_vars.Env_Vars.LOWER_GRID_COLOR, env_vars.Env_Vars.UPPER_GRID_COLOR
+        )
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
         green_grid = cv2.bitwise_and(frame, frame, mask=mask)
         gray = cv2.cvtColor(green_grid, cv2.COLOR_BGR2GRAY)
         low_threshold = 10
         high_threshold = 500
-        edges =cv2.Canny(gray, low_threshold,high_threshold) 
-        contours, _= cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        edges = cv2.Canny(gray, low_threshold, high_threshold)
+        contours, _ = cv2.findContours(
+            edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+
         return contours
     
     def getPixtoDb(px_value, span, gridheight): 
@@ -28,7 +30,7 @@ class Utilities:
 
     def parabola(x, a, b, c):
         """Defines a parabolic function."""
-        return a * x ** 2 + b * x + c
+        return a * x**2 + b * x + c
 
     def apply_color_filter(frame, lower_bound, upper_bound):
         """Apply a color filter based on RGB lower and upper bounds."""
@@ -43,16 +45,28 @@ class Utilities:
 
     def find_wave(frame):
         """Find and process the wave within a video frame."""
-        mask = Utilities.apply_color_filter(frame, env_vars.Env_Vars.LOWER_WAVE_COLOR, env_vars.Env_Vars.UPPER_WAVE_COLOR)
+        mask = Utilities.apply_color_filter(
+            frame,
+            env_vars.Env_Vars.LOWER_WAVE_COLOR,
+            env_vars.Env_Vars.UPPER_WAVE_COLOR,
+        )
         largest_contour = Utilities.find_largest_contour(mask)
 
         if largest_contour is not None and largest_contour.size > 0:
             mask = np.zeros_like(mask)
             cv2.drawContours(mask, [largest_contour], -1, (255), thickness=cv2.FILLED)
-            
+
             # Connect nearby contours by dilating and then eroding
-            mask = cv2.dilate(mask, env_vars.Env_Vars.KERNEL_SIZE, iterations=env_vars.Env_Vars.DILATE_ITERATIONS)
-            mask = cv2.erode(mask, env_vars.Env_Vars.KERNEL_SIZE, iterations=env_vars.Env_Vars.ERODE_ITERATIONS)
+            mask = cv2.dilate(
+                mask,
+                env_vars.Env_Vars.KERNEL_SIZE,
+                iterations=env_vars.Env_Vars.DILATE_ITERATIONS,
+            )
+            mask = cv2.erode(
+                mask,
+                env_vars.Env_Vars.KERNEL_SIZE,
+                iterations=env_vars.Env_Vars.ERODE_ITERATIONS,
+            )
 
         return mask, np.where(mask)
     def find_center_freq(frame):
@@ -96,11 +110,22 @@ class Utilities:
             max_row = np.max(non_zero_rows)
 
             # Calculate the height as the difference between max and min rows
-            height = max_row - min_row + 1  # Adding 1 to account for inclusive row indices
+            height = (
+                max_row - min_row + 1
+            )  # Adding 1 to account for inclusive row indices
             return height
         else:
             # If there are no non-zero pixels, return 0 as the height
             return 0
-        
 
-   
+    def print_wave_characteristics(result, frame_number, fps, gridheight):
+        """Print extracted wave characteristics."""
+        timestamp = frame_number / fps
+        # center_freq, min_amplitude, max_amplitude, center_amplitude = result
+        max_amplitude = result
+        print(f"Timestamp: {timestamp} seconds")
+        print(f"Gridheight: {gridheight}")
+        # print(f"Center Frequency: {center_freq}")
+        # print(f"Minimum Amplitude: {min_amplitude}")
+        print(f"Maximum Amplitude: {max_amplitude}")
+        # print(f"Center Amplitude: {center_amplitude}\n")

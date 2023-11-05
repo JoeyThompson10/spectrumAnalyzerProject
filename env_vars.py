@@ -1,6 +1,7 @@
 import numpy as np
 
 class Env_Vars:
+    SPAN = 1
     # User-configurable constants for color filtering
     LOWER_GREEN = np.array([33, 45, 45])
     UPPER_GREEN = np.array([92, 260, 260])
@@ -16,6 +17,8 @@ class Env_Vars:
     ERODE_ITERATIONS = 1
 
     # Video configuration
-    VIDEO_PATH = 'CW Signal.mp4'
+    VIDEO_PATH = 'Videos/CW Signal.mp4'
+    VIDEO_FOLDER = 'Videos'
+
     QUIT_KEY = 'q'
 pass

@@ -15,43 +15,33 @@
 # ===================================
 # Import necessary libraries
 # ===================================
+import os
 import cv2
 import csv
 import utilities
 import env_vars
-import numpy as np
+from datetime import datetime
+from time import sleep
 
 # ===================================
 #  Main execution functions
 # ===================================
 
-def print_wave_characteristics(result, frame_number, fps, gridheight):
-    """Print extracted wave characteristics."""
-    timestamp = frame_number / fps
-    # center_freq, min_amplitude, max_amplitude, center_amplitude = result
-    center_freq, min_amplitude, max_amplitude, center_amplitude = result    
-    print(f"Timestamp: {timestamp} seconds")
-    print(f"Gridheight: {gridheight}")
-    print(f"Center Frequency: {center_freq}")
-    # print(f"Minimum Amplitude: {min_amplitude}")
-    print(f"Maximum Amplitude: {max_amplitude}")
-    # print(f"Center Amplitude: {center_amplitude}\n")
-
-def main():
-    span_input = input("Enter Span: ")
-    span = int(span_input)
+def video_to_csv(cap, fileName):
+    span = env_vars.Env_Vars.SPAN
     """Main execution function for analyzing the video."""
     # Open the video file for processing
-    cap = cv2.VideoCapture(env_vars.Env_Vars.VIDEO_PATH)
     # Check if the video file opened successfully
     if not cap.isOpened():
         print("Error: Could not open the video file.")
+        sleep(5)
         return
 
     # Get first frame of the video
     ret0, first_frame = cap.read()
     if not ret0:
         print("Unable to read first frame")
+        sleep(5)
         exit()
 
     utilities.Utilities.findGrid(first_frame)
@@ -99,7 +89,7 @@ def main():
           
             # If a valid result is obtained, print and store it
             if result:
-                print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
+                utilities.Utilities.print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
                 detected_signals.append(result)
             
             if mask is not None:
@@ -116,21 +106,68 @@ def main():
             break
 
     # Store detected signals' information to a CSV file
-    csv_file = 'detected_signals.csv'
-    with open(csv_file, mode='w', newline='') as file:
+    csv_file = fileName + ".csv"
+
+
+    # Check if the Completed folder exists, if not, create it
+    completed_directory = 'Completed'
+    if not os.path.exists(completed_directory):
+        os.makedirs(completed_directory)
+    csvLocation = os.path.join(completed_directory, csv_file)
+
+
+    csvLocation = os.path.join('Completed', csv_file) 
+    with open(csvLocation, mode='w', newline='') as file:
         writer = csv.writer(file)
         # Define the CSV columns
         writer.writerow(['Timestamp (s)', 'Center Frequency', 'Minimum Amplitude', 'Maximum Amplitude', 'Center Amplitude'])
         for signal in detected_signals:
             frame_number = cap.get(cv2.CAP_PROP_POS_FRAMES) - len(detected_signals) + detected_signals.index(signal)
             timestamp = frame_number / fps
-            center_freq, min_amplitude, max_amplitude, center_amplitude = signal
-            writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
+
+            # center_freq, min_amplitude, max_amplitude, center_amplitude = signal
+            max_amplitude = signal
+
+            # writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
+            writer.writerow([timestamp, max_amplitude])
+            
 
     # Properly release the video and close any GUI windows
     cap.release()
     cv2.destroyAllWindows()
     print("Video playback is done.")
+
+def process_video_file(video_file):
+    cap = cv2.VideoCapture(video_file)
+    fileName = os.path.basename(video_file)
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    fileName = current_time + "_CSV_" + fileName
+    video_to_csv(cap, fileName)
+
+def main():
+    # Specify the folder containing the videos
+    video_folder_path = env_vars.Env_Vars.VIDEO_FOLDER
+    
+    # Check if the folder exists
+    if not os.path.exists(video_folder_path):
+        print("The specified folder does not exist: " + video_folder_path)
+        sleep(5)
+        return
+    
+    # List all files in the video folder
+    video_files = [f for f in os.listdir(video_folder_path) if f.endswith('.mp4')]
+    
+    # Check if there are any mp4 files in the folder
+    if not video_files:
+        print("No videos found in " + video_folder_path + ".")
+        sleep(5)
+        return
+    
+    # Process each video file
+    for video_file in video_files:
+        full_video_path = os.path.join(video_folder_path, video_file)
+        print("Processing video: " + full_video_path)
+        process_video_file(full_video_path)
 
 # ===================================
 # 5. Script entry point
