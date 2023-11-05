@@ -29,10 +29,10 @@ def print_wave_characteristics(result, frame_number, fps, gridheight):
     """Print extracted wave characteristics."""
     timestamp = frame_number / fps
     # center_freq, min_amplitude, max_amplitude, center_amplitude = result
-    max_amplitude = result
+    center_freq, min_amplitude, max_amplitude, center_amplitude = result    
     print(f"Timestamp: {timestamp} seconds")
     print(f"Gridheight: {gridheight}")
-    # print(f"Center Frequency: {center_freq}")
+    print(f"Center Frequency: {center_freq}")
     # print(f"Minimum Amplitude: {min_amplitude}")
     print(f"Maximum Amplitude: {max_amplitude}")
     # print(f"Center Amplitude: {center_amplitude}\n")
@@ -78,6 +78,7 @@ def main():
             # wave_x and wave_y will be used to extract wave characteristics
             # mask will be None if no wave is detected
             mask, (wave_x, wave_y) = utilities.Utilities.find_wave(frame)
+
             while(rect_cnt <= 10):
                 contours = utilities.Utilities.findGrid(frame)
                 for contour in contours:
@@ -93,7 +94,7 @@ def main():
                            
 
             # Get detailed information from the processed wave
-            result = utilities.Utilities.process_wave(frame, mask, span, gridheight)
+            result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y)
 
           
             # If a valid result is obtained, print and store it
