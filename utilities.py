@@ -89,20 +89,21 @@ class Utilities:
         center_freq_px = -b / (2 * (a-leftmost_x))
         center_freq = Utilities.getPixtoDb(center_freq_px, span, gridheight)
         if(leftmost_y < (initial_y+initial_y*0.1)):
-            mask_height = Utilities.get_mask_height(mask) #pixel height of the mask
+            mask_height = Utilities.get_mask_height(mask, initial_y) #pixel height of the mask
             amplitude = Utilities.getPixtoDb(mask_height, span, gridheight)
             return center_freq, amplitude
 
 
-    def get_mask_height(mask):
+    def get_mask_height(mask, initial_y):
         # Find the row indices of non-zero pixels in the mask
         non_zero_rows = np.where(mask)[0]
 
         if non_zero_rows.size > 0:
             # Calculate the minimum and maximum row indices to find the height
             min_row = np.min(non_zero_rows)
-            max_row = np.max(non_zero_rows)
-
+            print(f"min row: {min_row} px")
+            max_row = initial_y
+            print(f"max row: {max_row} px")
             # Calculate the height as the difference between max and min rows
             height = (
                 max_row - min_row + 1
