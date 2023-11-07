@@ -28,7 +28,8 @@ from time import sleep
 # ===================================
 
 def video_to_csv(cap, fileName):
-    span = env_vars.Env_Vars.SPAN
+    span= int(input('Enter span: '))
+    
     """Main execution function for analyzing the video."""
     # Open the video file for processing
     # Check if the video file opened successfully
@@ -52,7 +53,12 @@ def video_to_csv(cap, fileName):
     print(f"Playing video with dimensions: {frame_width}x{frame_height} and {fps} FPS.")
     rect_cnt = 0
     gridheight = 0
-
+    min_amplitude = 1000
+    max_amplitude = 0
+    center_amplitude = 0
+    # initialize y coordinate of the wave to check for when wave data is being cleared
+    initial_y = 0
+    y_threshold = 0.10
     # List to store detected signals' information
     detected_signals = []
     # Main loop to process each frame in the video
@@ -67,7 +73,9 @@ def video_to_csv(cap, fileName):
             # mask will be displayed to the user to show the detected wave
             # wave_x and wave_y will be used to extract wave characteristics
             # mask will be None if no wave is detected
-            mask, (wave_x, wave_y) = utilities.Utilities.find_wave(frame)
+            # leftmost_x is used to check position in the video where the wave data begins
+            # leftmost_y is to check the y position of the wave data to determine when wave data is being cleared and should be ignored
+            mask, (wave_x, wave_y), leftmost_x, leftmost_y = utilities.Utilities.find_wave(frame)
 
             while(rect_cnt <= 10):
                 contours = utilities.Utilities.findGrid(frame)
@@ -80,16 +88,22 @@ def video_to_csv(cap, fileName):
                             if(rect_cnt <= 10):
                                 gridheight+=h
                                 rect_cnt +=1
+                initial_y = leftmost_y
                 
                            
 
             # Get detailed information from the processed wave
-            result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y)
-
-          
+            if(leftmost_y > (initial_y-initial_y*y_threshold)):
+                result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y)
+            if result:
+                center_freq, amplitude = result
+                if(amplitude > max_amplitude):
+                    max_amplitude = amplitude
+                if(amplitude < min_amplitude):
+                    min_amplitude = amplitude
             # If a valid result is obtained, print and store it
             if result:
-                utilities.Utilities.print_wave_characteristics(result, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
+                utilities.Utilities.print_wave_characteristics(min_amplitude, max_amplitude, center_freq, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
                 detected_signals.append(result)
             
             if mask is not None:
