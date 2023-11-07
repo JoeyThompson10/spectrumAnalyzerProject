@@ -88,13 +88,12 @@ def video_to_csv(cap, fileName):
                             if(rect_cnt <= 10):
                                 gridheight+=h
                                 rect_cnt +=1
-                initial_y = leftmost_y
-                
+                initial_y = leftmost_y # initialize the y value of the wave based on the start of the video
                            
-
             # Get detailed information from the processed wave
 
             result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y)
+            
             if result:
                 center_freq, amplitude = result
                 if(amplitude > max_amplitude):
@@ -104,8 +103,10 @@ def video_to_csv(cap, fileName):
                 
             # If a valid result is obtained, print and store it
             if result:
+                center_amplitude = (min_amplitude+max_amplitude)/2
+                data = center_freq, min_amplitude, max_amplitude, center_amplitude
                 utilities.Utilities.print_wave_characteristics(min_amplitude, max_amplitude, center_freq, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
-                detected_signals.append(result)
+                detected_signals.append(data)
             
             if mask is not None:
                 # Show the cropped frame with the wave to the user
