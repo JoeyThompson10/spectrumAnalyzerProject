@@ -67,20 +67,16 @@ class Utilities:
                 env_vars.Env_Vars.KERNEL_SIZE,
                 iterations=env_vars.Env_Vars.ERODE_ITERATIONS,
             )
+        leftmost_x = None
+        leftmost_y = None
+        for point in largest_contour:
+            x, y = point[0]
+            if leftmost_x is None or x < leftmost_x:
+                leftmost_x = x
+                leftmost_y = y
+        return mask, np.where(mask), leftmost_x, leftmost_y
 
-        return mask, np.where(mask)
-    def find_center_freq(frame):
-        threshold_value = 100
-        thresholded_frame = cv2.threshold(frame, threshold_value, 255, cv2.THRESH_BINARY)[1]
-        center_freq = 0
-        contours, _ = cv2.findContours(thresholded_frame , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if len(contours) > 1:
-            line_distances = [contours[i + 1][0][0][0] - contours[i][0][0][0] for i in range(len(contours) - 1)]
-            center_freq = np.mean(line_distances)
-        
-        return center_freq
-
-    def process_wave(frame, mask, span, gridheight, wave_x, wave_y):
+    def process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y):
         """Analyze and extract wave characteristics."""
         if len(wave_x) > 0 and len(wave_y) > 0:
             # Fit the points to a parabola
@@ -90,14 +86,12 @@ class Utilities:
         a, b, c = params
 
         # Calculate center frequency using vertex formula (-b / 2a)
-        center_freq_px = -b / (2 * a)
+        center_freq_px = -b / (2 * (a-leftmost_x))
         center_freq = Utilities.getPixtoDb(center_freq_px, span, gridheight)
-        mask_height = Utilities.get_mask_height(mask) #pixel height of the mask
-        amplitude = Utilities.getPixtoDb(mask_height, span, gridheight)
-        min_amplitude = amplitude
-        max_amplitude = amplitude
-        center_amplitude = 0
-        return center_freq, min_amplitude, max_amplitude, center_amplitude
+        if(leftmost_y < (initial_y+initial_y*0.1)):
+            mask_height = Utilities.get_mask_height(mask) #pixel height of the mask
+            amplitude = Utilities.getPixtoDb(mask_height, span, gridheight)
+            return center_freq, amplitude
 
 
     def get_mask_height(mask):
@@ -118,14 +112,14 @@ class Utilities:
             # If there are no non-zero pixels, return 0 as the height
             return 0
 
-    def print_wave_characteristics(result, frame_number, fps, gridheight):
+    def print_wave_characteristics(min_amplitude, max_amplitude, center_freq, frame_number, fps, gridheight):
         """Print extracted wave characteristics."""
         timestamp = frame_number / fps
         # center_freq, min_amplitude, max_amplitude, center_amplitude = result
-        center_freq, min_amplitude, max_amplitude, center_amplitude = result
+        center_amplitude = (max_amplitude + min_amplitude)/2
         print(f"Timestamp: {timestamp} seconds")
-        print(f"Gridheight: {gridheight}")
-        print(f"Center Frequency: {center_freq}")
-        print(f"Minimum Amplitude: {min_amplitude}")
-        print(f"Maximum Amplitude: {max_amplitude}")
-        print(f"Center Amplitude: {center_amplitude}\n")
+        print(f"Gridheight: {gridheight} px")
+        print(f"Center Frequency: {center_freq} GHZ")
+        print(f"Minimum Amplitude: {min_amplitude} dB")
+        print(f"Maximum Amplitude: {max_amplitude} dB")
+        print(f"Center Amplitude: {center_amplitude} dB\n")
