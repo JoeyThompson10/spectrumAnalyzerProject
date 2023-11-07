@@ -93,14 +93,15 @@ def video_to_csv(cap, fileName):
                            
 
             # Get detailed information from the processed wave
-            if(leftmost_y > (initial_y-initial_y*y_threshold)):
-                result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y)
+
+            result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y)
             if result:
                 center_freq, amplitude = result
                 if(amplitude > max_amplitude):
                     max_amplitude = amplitude
                 if(amplitude < min_amplitude):
                     min_amplitude = amplitude
+                
             # If a valid result is obtained, print and store it
             if result:
                 utilities.Utilities.print_wave_characteristics(min_amplitude, max_amplitude, center_freq, cap.get(cv2.CAP_PROP_POS_FRAMES), fps, gridheight)
