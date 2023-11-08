@@ -1,7 +1,16 @@
+*.csv
+*.mp4
 
-detected_signals.csv
-__pycache__/utilities.cpython-311.pyc
-__pycache__/env_vars.cpython-311.pyc
-__pycache__/utilities.cpython-311.pyc
-detected_signals.csv
-detected_signals.csv
+dist
+build
+Completed
+Videos
+
+__pycache__
+.idea
+
+.vscode
+.vscode
+.vs
+
+main.spec
