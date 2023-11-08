@@ -28,7 +28,9 @@ from time import sleep
 # ===================================
 
 def video_to_csv(cap, fileName):
-    span= int(input('Enter span: '))
+    span= float(input('Enter SPAN value (HZ): ')) # Span value from spectrum analyzer -- change in hz per vertical line
+    center= float(input('Enter CENTER value (GHZ): ')) # CENTER value from spectrum analyzer -- middle vertical line on the x axis, measured in Ghz 
+    dbPerHLine= int(input('Enter dB/hotizontal line value: ')) # XXdB/ value from spectrum analyzer -- located to the right of the RL, change in dB per horizontal line
     
     """Main execution function for analyzing the video."""
     # Open the video file for processing
@@ -53,12 +55,14 @@ def video_to_csv(cap, fileName):
     print(f"Playing video with dimensions: {frame_width}x{frame_height} and {fps} FPS.")
     rect_cnt = 0
     gridheight = 0
+    gridwidth = 0
+    center_x = 0 # x value of the center line of the grid which correlates with CENTER value from spectrom analyzer
     min_amplitude = 1000
     max_amplitude = 0
     center_amplitude = 0
     # initialize y coordinate of the wave to check for when wave data is being cleared
     initial_y = 0
-    y_threshold = 0.10
+
     # List to store detected signals' information
     detected_signals = []
     # Main loop to process each frame in the video
@@ -86,13 +90,17 @@ def video_to_csv(cap, fileName):
                         x, y, w, h = cv2.boundingRect(approx)
                         if(h > 50 & h < 100):
                             if(rect_cnt <= 10):
+                                gridwidth +=w
                                 gridheight+=h
                                 rect_cnt +=1
                 initial_y = leftmost_y # initialize the y value of the wave based on the start of the video
-                           
+                initial_x = leftmost_x # initialize the x value of the wave based on the start of the video 
+            print(f"initial x: {initial_x}")
+            center_x = initial_x + (gridwidth/2) #establish center x position of the center of the spectrom analyzer      
+
             # Get detailed information from the processed wave
 
-            result = utilities.Utilities.process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y)
+            result = utilities.Utilities.process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, initial_x, leftmost_y, initial_y, gridwidth, center_x)
             
             if result:
                 center_freq, amplitude = result
