@@ -23,10 +23,19 @@ class Utilities:
 
         return contours
     
-    def getPixtoDb(px_value, span, gridheight): 
-        dbPxHeight = (gridheight)/span
+    def getPixtoDb(px_value, dbPerHLine, gridheight): 
+        dbPxHeight = (gridheight)/(dbPerHLine*10)
         wave_amplitude = px_value/dbPxHeight
         return wave_amplitude
+    
+    def getPixtoHZ(center_freq_px, span, center, gridwidth, center_x): 
+        
+        hzPxWidth = gridwidth/(span)
+        print(f"center_x: {center_x} px")
+        print(f"center_freq_px: {center_freq_px} px")
+        deviation_px = center_x - center_freq_px
+        center_freq = center-(deviation_px/hzPxWidth)*0.001 # convert the deviation in pixels to HZ and subtract from the center (eg 1GHZ) to find center frequency
+        return center_freq
 
     def parabola(x, a, b, c):
         """Defines a parabolic function."""
@@ -76,7 +85,7 @@ class Utilities:
                 leftmost_y = y
         return mask, np.where(mask), leftmost_x, leftmost_y
 
-    def process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y):
+    def process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y, gridwidth, center_x):
         """Analyze and extract wave characteristics."""
         if len(wave_x) > 0 and len(wave_y) > 0:
             # Fit the points to a parabola
@@ -86,11 +95,12 @@ class Utilities:
         a, b, c = params
 
         # Calculate center frequency using vertex formula (-b / 2a)
-        center_freq_px = -b / (2 * (a-leftmost_x))
-        center_freq = Utilities.getPixtoDb(center_freq_px, span, gridheight)
+        center_freq_px = (-b)/ (2 * (a))
+        center_freq = Utilities.getPixtoHZ(center_freq_px, span, center, gridwidth, center_x)
+
         if(leftmost_y < (initial_y+initial_y*0.1)):
             mask_height = Utilities.get_mask_height(mask, initial_y) #pixel height of the mask
-            amplitude = Utilities.getPixtoDb(mask_height, span, gridheight)
+            amplitude = Utilities.getPixtoDb(mask_height, dbPerHLine, gridheight)
             return center_freq, amplitude
 
 
