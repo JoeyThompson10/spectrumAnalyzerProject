@@ -23,12 +23,12 @@ class Utilities:
 
         return contours
     
-    def getPixtoDb(px_value, dbPerHLine, gridheight): 
+    def getAmplitude(px_value, dbPerHLine, gridheight): 
         dbPxHeight = (gridheight)/(dbPerHLine*10)
         wave_amplitude = px_value/dbPxHeight
         return wave_amplitude
     
-    def getPixtoHZ(center_freq_px, span, center, gridwidth, center_x): 
+    def getCenterFreq(center_freq_px, span, center, gridwidth, center_x): 
         
         hzPxWidth = gridwidth/(span) # get width of 1HZ
         print(f"center_x: {center_x} px")
@@ -96,11 +96,11 @@ class Utilities:
 
         # Calculate center frequency using vertex formula (-b / 2a)
         center_freq_px = (-b)/ (2 * (a))
-        center_freq = Utilities.getPixtoHZ(center_freq_px, span, center, gridwidth, center_x)
+        center_freq = Utilities.getCenterFreq(center_freq_px, span, center, gridwidth, center_x)
 
         if(leftmost_y < (initial_y+initial_y*0.1)):
             mask_height = Utilities.get_mask_height(mask, initial_y) #pixel height of the mask
-            amplitude = Utilities.getPixtoDb(mask_height, dbPerHLine, gridheight)
+            amplitude = Utilities.getAmplitude(mask_height, dbPerHLine, gridheight)
             return center_freq, amplitude
 
 
