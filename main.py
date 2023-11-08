@@ -96,6 +96,7 @@ def video_to_csv(cap, fileName):
                 initial_y = leftmost_y # initialize the y value of the wave based on the start of the video
                 initial_x = leftmost_x # initialize the x value of the wave based on the start of the video 
             print(f"initial x: {initial_x}")
+            print(f"gridwidth: {gridwidth}")
             center_x = initial_x + (gridwidth/2) #establish center x position of the center of the spectrom analyzer      
 
             # Get detailed information from the processed wave

@@ -34,7 +34,7 @@ class Utilities:
         print(f"center_x: {center_x} px")
         print(f"center_freq_px: {center_freq_px} px")
         deviation_px = center_x - center_freq_px # get the deviation of the center frequency pixel value from the center line's x value
-        center_freq = center-(deviation_px/hzPxWidth)*0.001 # convert the deviation in pixels to HZ and subtract from the center (eg 1GHZ) to find center frequency
+        center_freq = center+(deviation_px/hzPxWidth)*0.001 # convert the deviation in pixels to HZ and subtract from the center (eg 1GHZ) to find center frequency
         return center_freq
 
     def parabola(x, a, b, c):
@@ -76,6 +76,7 @@ class Utilities:
                 env_vars.Env_Vars.KERNEL_SIZE,
                 iterations=env_vars.Env_Vars.ERODE_ITERATIONS,
             )
+        # find the leftmost point of the mask 
         leftmost_x = None
         leftmost_y = None
         for point in largest_contour:
@@ -85,8 +86,9 @@ class Utilities:
                 leftmost_y = y
         return mask, np.where(mask), leftmost_x, leftmost_y
 
-    def process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y, gridwidth, center_x):
+    def process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, initial_x, leftmost_y, initial_y, gridwidth, center_x):
         """Analyze and extract wave characteristics."""
+        print(f"wave_x: {wave_x} px")
         if len(wave_x) > 0 and len(wave_y) > 0:
             # Fit the points to a parabola
             params, _ = curve_fit(Utilities.parabola, wave_x, wave_y)
@@ -94,11 +96,13 @@ class Utilities:
         # Extract the coefficients of the fitted parabola
         a, b, c = params
 
-        # Calculate center frequency using vertex formula (-b / 2a)
-        center_freq_px = (-b)/ (2 * (a))
-        center_freq = Utilities.getCenterFreq(center_freq_px, span, center, gridwidth, center_x)
+       
 
         if(leftmost_y < (initial_y+initial_y*0.1)):
+             # Calculate center frequency using vertex formula (-b / 2a)
+            center_freq_px = -b/ (2 * a)  # x coorinate of the vertex of the wave
+            
+            center_freq = Utilities.getCenterFreq(center_freq_px, span, center, gridwidth, center_x)
             mask_height = Utilities.get_mask_height(mask, initial_y) #pixel height of the mask
             amplitude = Utilities.getAmplitude(mask_height, dbPerHLine, gridheight)
             return center_freq, amplitude
@@ -111,9 +115,7 @@ class Utilities:
         if non_zero_rows.size > 0:
             # Calculate the minimum and maximum row indices to find the height
             min_row = np.min(non_zero_rows)
-            print(f"min row: {min_row} px")
             max_row = initial_y
-            print(f"max row: {max_row} px")
             # Calculate the height as the difference between max and min rows
             height = (
                 max_row - min_row + 1
