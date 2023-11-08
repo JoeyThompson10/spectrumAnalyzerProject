@@ -30,10 +30,10 @@ class Utilities:
     
     def getPixtoHZ(center_freq_px, span, center, gridwidth, center_x): 
         
-        hzPxWidth = gridwidth/(span)
+        hzPxWidth = gridwidth/(span) # get width of 1HZ
         print(f"center_x: {center_x} px")
         print(f"center_freq_px: {center_freq_px} px")
-        deviation_px = center_x - center_freq_px
+        deviation_px = center_x - center_freq_px # get the deviation of the center frequency pixel value from the center line's x value
         center_freq = center-(deviation_px/hzPxWidth)*0.001 # convert the deviation in pixels to HZ and subtract from the center (eg 1GHZ) to find center frequency
         return center_freq
 
