@@ -21,7 +21,7 @@ class Utilities:
             edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
 
-        return contours
+        return contours, np.where(mask)
     
     def getAmplitude(px_value, dbPerHLine, gridheight): 
         dbPxHeight = (gridheight)/(dbPerHLine*10)
@@ -34,7 +34,7 @@ class Utilities:
         print(f"center_x: {center_x} px")
         print(f"center_freq_px: {center_freq_px} px")
         deviation_px = center_x - center_freq_px # get the deviation of the center frequency pixel value from the center line's x value
-        center_freq = center+(deviation_px/hzPxWidth)*0.001 # convert the deviation in pixels to HZ and subtract from the center (eg 1GHZ) to find center frequency
+        center_freq = center+(deviation_px/hzPxWidth)*0.001 # convert the deviation in pixels to HZ and add to the center (eg 1GHZ) to find center frequency
         return center_freq
 
     def parabola(x, a, b, c):
@@ -89,6 +89,7 @@ class Utilities:
     def process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, initial_x, leftmost_y, initial_y, gridwidth, center_x):
         """Analyze and extract wave characteristics."""
         print(f"wave_x: {wave_x} px")
+        print(f"wave_y: {wave_y} px")
         if len(wave_x) > 0 and len(wave_y) > 0:
             # Fit the points to a parabola
             params, _ = curve_fit(Utilities.parabola, wave_x, wave_y)

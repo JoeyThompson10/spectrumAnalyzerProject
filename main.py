@@ -20,6 +20,7 @@ import cv2
 import csv
 import utilities
 import env_vars
+import numpy as np
 from datetime import datetime
 from time import sleep
 
@@ -47,7 +48,6 @@ def video_to_csv(cap, fileName):
         sleep(5)
         exit()
 
-    utilities.Utilities.findGrid(first_frame)
 
     # Get video properties like width, height, and FPS
     frame_width, frame_height = int(cap.get(3)), int(cap.get(4))
@@ -79,10 +79,10 @@ def video_to_csv(cap, fileName):
             # mask will be None if no wave is detected
             # leftmost_x is used to check position in the video where the wave data begins
             # leftmost_y is to check the y position of the wave data to determine when wave data is being cleared and should be ignored
-            mask, (wave_x, wave_y), leftmost_x, leftmost_y = utilities.Utilities.find_wave(frame)
+            mask, (wave_y, wave_x), leftmost_x, leftmost_y = utilities.Utilities.find_wave(frame)
 
             while(rect_cnt <= 10):
-                contours = utilities.Utilities.findGrid(frame)
+                contours, (grid_y, grid_x) = utilities.Utilities.findGrid(frame)
                 for contour in contours:
                     perimeter = cv2.arcLength(contour, True)
                     approx = cv2.approxPolyDP(contour, 0.02*perimeter, True)
@@ -97,8 +97,8 @@ def video_to_csv(cap, fileName):
                 initial_x = leftmost_x # initialize the x value of the wave based on the start of the video 
             print(f"initial x: {initial_x}")
             print(f"gridwidth: {gridwidth}")
-            center_x = initial_x + (gridwidth/2) #establish center x position of the center of the spectrom analyzer      
-
+            # center_x = initial_x + (gridwidth/2) #establish center x position of the center of the spectrom analyzer      
+            center_x = np.median(grid_x)
             # Get detailed information from the processed wave
 
             result = utilities.Utilities.process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, initial_x, leftmost_y, initial_y, gridwidth, center_x)
