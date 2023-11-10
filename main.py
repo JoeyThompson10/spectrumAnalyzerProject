@@ -79,7 +79,7 @@ def video_to_csv(cap, fileName):
             # mask will be None if no wave is detected
             # leftmost_x is used to check position in the video where the wave data begins
             # leftmost_y is to check the y position of the wave data to determine when wave data is being cleared and should be ignored
-            mask, (wave_y, wave_x), leftmost_x, leftmost_y = utilities.Utilities.find_wave(frame)
+            mask, (wave_y, wave_x), leftmost_x, leftmost_y, center_x, mask_width = utilities.Utilities.find_wave(frame)
 
             while(rect_cnt <= 10):
                 contours, (grid_y, grid_x) = utilities.Utilities.findGrid(frame)
@@ -96,9 +96,11 @@ def video_to_csv(cap, fileName):
                 initial_y = leftmost_y # initialize the y value of the wave based on the start of the video
                 initial_x = leftmost_x # initialize the x value of the wave based on the start of the video 
             print(f"initial x: {initial_x}")
-            print(f"gridwidth: {gridwidth}")
             # center_x = initial_x + (gridwidth/2) #establish center x position of the center of the spectrom analyzer      
-            center_x = np.median(grid_x)
+            gridheight = grid_y[len(grid_y)-1]-grid_y[0]-252 # 252px is the distance between the actual grid and the top and bottom of the 
+            print(f"gridwidth: {gridwidth}")
+            gridwidth = mask_width # Since the width of the wave mask is the same as the width of the grid, we can use this as the basis for the grid width to determine the pixel to HZ ratio
+
             # Get detailed information from the processed wave
 
             result = utilities.Utilities.process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, initial_x, leftmost_y, initial_y, gridwidth, center_x)
