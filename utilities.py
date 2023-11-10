@@ -78,13 +78,20 @@ class Utilities:
             )
         # find the leftmost point of the mask 
         leftmost_x = None
+        rightmost_x = None
         leftmost_y = None
         for point in largest_contour:
             x, y = point[0]
+            x2, y2 = point[len(point)-1]
             if leftmost_x is None or x < leftmost_x:
                 leftmost_x = x
                 leftmost_y = y
-        return mask, np.where(mask), leftmost_x, leftmost_y
+            if rightmost_x is None or x2 > rightmost_x:
+                rightmost_x = x2
+        
+        center_x = (rightmost_x+leftmost_x)/2
+        mask_width = rightmost_x-leftmost_x
+        return mask, np.where(mask), leftmost_x, leftmost_y, center_x, mask_width
 
     def process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, initial_x, leftmost_y, initial_y, gridwidth, center_x):
         """Analyze and extract wave characteristics."""
