@@ -29,7 +29,7 @@ import multiprocessing
 #  Main execution functions
 # ===================================
 
-def video_to_csv(cap, fileName, span,center, dbPerHLine):
+def video_to_csv(cap, fileName, span,center, dbPerHLine): #Takes in the new parameters from multiprocessing span, center, dbPerHLine
     
     """Main execution function for analyzing the video."""
     # Open the video file for processing
@@ -162,6 +162,7 @@ def video_to_csv(cap, fileName, span,center, dbPerHLine):
     cv2.destroyAllWindows()
     print("Video playback is done.")
 
+#Takes the video and converts to csv file with the new parameters from multiprocessing
 def video_to_csv_worker(video_file, span, center, dbPerHLine):
     cap = cv2.VideoCapture(video_file)
     fileName = os.path.basename(video_file)
@@ -169,6 +170,7 @@ def video_to_csv_worker(video_file, span, center, dbPerHLine):
     fileName = current_time + "_CSV_" + fileName
     video_to_csv(cap, fileName, span, center, dbPerHLine)
 
+#Processes through the video files in the folder has new parameters from multiprocessing
 def process_video_file_worker(video_file, span, center, dbPerHLine):
     full_video_path = os.path.join(env_vars.Env_Vars.VIDEO_FOLDER, video_file)
     print("Processing video: " + full_video_path)
@@ -201,7 +203,7 @@ def main():
     dbPerHLine = int(input('Enter dB/horizontal line value: '))
 
     # Use multiprocessing.Pool to process videos in parallel
-    with multiprocessing.Pool(processes=num_processes) as pool:
+    with multiprocessing.Pool(processes=num_processes) as pool: #Uses a pool.starmap to pass in multiple arguments to the worker function
         pool.starmap(process_video_file_worker, [(video, span, center, dbPerHLine) for video in video_files])
 # ===================================
 # 5. Script entry point
