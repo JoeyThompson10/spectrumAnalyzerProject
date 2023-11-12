@@ -25,6 +25,7 @@ from datetime import datetime
 from time import sleep
 import multiprocessing
 import SpectrumAnalyzerGUI
+import webbrowser
 
 # ===================================
 #  Main execution functions
@@ -211,6 +212,12 @@ def main():
     # Use multiprocessing.Pool to process videos in parallel, csn iterate through the list of videos and apply the video_file_worker function to each element
     with multiprocessing.Pool(processes=num_processes) as pool: #Creates a pool of worker processes and the parameter process is based on the number of worker processes
         pool.starmap(process_video_file_worker, [(video, span, center, dbPerHLine) for video in video_files]) #starmap is used to apply video_file_worker to each element and each element is a tuple containing the video file name and the new parameters
+
+    # After all video processing is done, open the Completed folder
+    completed_folder_path = os.path.abspath("Completed")
+    webbrowser.open(completed_folder_path)
+
+    
 # ===================================
 # 5. Script entry point
 # ===================================
