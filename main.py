@@ -24,7 +24,7 @@ import numpy as np
 from datetime import datetime
 from time import sleep
 import multiprocessing
-import EnvVarEditor
+import SpectrumAnalyzerGUI
 
 # ===================================
 #  Main execution functions
@@ -215,5 +215,5 @@ def main():
 # 5. Script entry point
 # ===================================
 if __name__ == "__main__":
-    app = EnvVarEditor.EnvVarEditor() #Creates the GUI
+    app = SpectrumAnalyzerGUI.SpectrumAnalyzerGUI() #Creates the GUI
     app.mainloop()  # The main analysis starts when the user clicks "Start" in the GUI

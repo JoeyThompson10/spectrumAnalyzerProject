@@ -21,7 +21,6 @@ class Env_Vars:
     ERODE_ITERATIONS = 1
 
     # Video configuration
-    VIDEO_PATH = 'Videos/CW Signal.mp4'
     VIDEO_FOLDER = 'Videos'
 
     QUIT_KEY = 'q'
