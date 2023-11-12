@@ -23,15 +23,13 @@ import env_vars
 import numpy as np
 from datetime import datetime
 from time import sleep
+import multiprocessing
 
 # ===================================
 #  Main execution functions
 # ===================================
 
-def video_to_csv(cap, fileName):
-    span= float(input('Enter SPAN value (HZ): ')) # Span value from spectrum analyzer -- change in hz per vertical line
-    center= float(input('Enter CENTER value (GHZ): ')) # CENTER value from spectrum analyzer -- middle vertical line on the x axis, measured in Ghz 
-    dbPerHLine= int(input('Enter dB/hotizontal line value: ')) # XXdB/ value from spectrum analyzer -- located to the right of the RL, change in dB per horizontal line
+def video_to_csv(cap, fileName, span,center, dbPerHLine):
     
     """Main execution function for analyzing the video."""
     # Open the video file for processing
@@ -164,12 +162,17 @@ def video_to_csv(cap, fileName):
     cv2.destroyAllWindows()
     print("Video playback is done.")
 
-def process_video_file(video_file):
+def video_to_csv_worker(video_file, span, center, dbPerHLine):
     cap = cv2.VideoCapture(video_file)
     fileName = os.path.basename(video_file)
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     fileName = current_time + "_CSV_" + fileName
-    video_to_csv(cap, fileName)
+    video_to_csv(cap, fileName, span, center, dbPerHLine)
+
+def process_video_file_worker(video_file, span, center, dbPerHLine):
+    full_video_path = os.path.join(env_vars.Env_Vars.VIDEO_FOLDER, video_file)
+    print("Processing video: " + full_video_path)
+    video_to_csv_worker(full_video_path, span, center, dbPerHLine)
 
 def main():
     # Specify the folder containing the videos
@@ -190,12 +193,16 @@ def main():
         sleep(5)
         return
     
-    # Process each video file
-    for video_file in video_files:
-        full_video_path = os.path.join(video_folder_path, video_file)
-        print("Processing video: " + full_video_path)
-        process_video_file(full_video_path)
+    # # Process each video file
+    # Set multiprocessing parameters
+    num_processes = min(multiprocessing.cpu_count(), len(video_files))
+    span = float(input('Enter SPAN value (HZ): '))
+    center = float(input('Enter CENTER value (GHZ): '))
+    dbPerHLine = int(input('Enter dB/horizontal line value: '))
 
+    # Use multiprocessing.Pool to process videos in parallel
+    with multiprocessing.Pool(processes=num_processes) as pool:
+        pool.starmap(process_video_file_worker, [(video, span, center, dbPerHLine) for video in video_files])
 # ===================================
 # 5. Script entry point
 # ===================================
