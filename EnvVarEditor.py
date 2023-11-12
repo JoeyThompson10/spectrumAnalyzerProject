@@ -46,8 +46,9 @@ class EnvVarEditor(tk.Tk): # GUI for editing environment variables
             ttk.Button(parent, text=f"Edit {var}", command=lambda var_name=var: self.edit_color(var_name)).pack(fill='x', pady=5)
 
     def start_analysis(self):
-        self.destroy()  # Close the GUI
-        main.main()  # Run the main function
+        env_vars.save_settings() # Save the environment variables
+        self.destroy() # Close the GUI
+        main.main() # Run the main function
 
     # Methods for editing numeric and string variables
     def edit_span(self):

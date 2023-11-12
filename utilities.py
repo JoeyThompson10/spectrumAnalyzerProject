@@ -43,6 +43,8 @@ class Utilities:
 
     def apply_color_filter(frame, lower_bound, upper_bound):
         """Apply a color filter based on RGB lower and upper bounds."""
+        if not isinstance(lower_bound, np.ndarray) or not isinstance(upper_bound, np.ndarray):
+            raise TypeError("Color bounds must be numpy arrays")
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, lower_bound, upper_bound)
         return mask
@@ -61,9 +63,14 @@ class Utilities:
         )
         largest_contour = Utilities.find_largest_contour(mask)
 
+        # Check if the largest contour is not None and has a size greater than 0
         if largest_contour is not None and largest_contour.size > 0:
             mask = np.zeros_like(mask)
             cv2.drawContours(mask, [largest_contour], -1, (255), thickness=cv2.FILLED)
+
+            # Check if KERNEL_SIZE is a NumPy array and raise an error if not
+            if not isinstance(env_vars.Env_Vars.KERNEL_SIZE, np.ndarray): 
+                raise TypeError("KERNEL_SIZE must be a numpy array") 
 
             # Connect nearby contours by dilating and then eroding
             mask = cv2.dilate(

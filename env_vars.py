@@ -1,4 +1,6 @@
 import numpy as np
+import json
+import os
 
 class Env_Vars:
     SPAN = 1
@@ -23,4 +25,33 @@ class Env_Vars:
     VIDEO_FOLDER = 'Videos'
 
     QUIT_KEY = 'q'
-pass
+
+def save_settings():
+        settings = {}
+        for attr in dir(Env_Vars):
+            if not callable(getattr(Env_Vars, attr)) and not attr.startswith("__"):
+                value = getattr(Env_Vars, attr)
+                if isinstance(value, np.ndarray):
+                    value = value.tolist()  # Convert numpy array to list
+                settings[attr] = value
+        with open('env_settings.json', 'w') as file:
+            json.dump(settings, file)
+
+def load_settings():
+    if os.path.exists('env_settings.json'):
+        with open('env_settings.json', 'r') as file:
+            settings = json.load(file)
+            for attr in settings:
+                value = settings[attr]
+                if isinstance(value, list):
+                    value = np.array(value)  # Convert list to numpy array
+                elif isinstance(value, str):
+                    value = value.replace('\\', '/')
+                elif isinstance(value, bool):
+                    value = value
+                
+                setattr(Env_Vars, attr, value)
+    else:
+        save_settings()
+
+load_settings()
