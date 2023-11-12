@@ -24,6 +24,7 @@ import numpy as np
 from datetime import datetime
 from time import sleep
 import multiprocessing
+import EnvVarEditor
 
 # ===================================
 #  Main execution functions
@@ -198,9 +199,14 @@ def main():
     # # Process each video file
     # Set multiprocessing parameters
     num_processes = min(multiprocessing.cpu_count(), len(video_files)) #Determines the number of process that can be used based off of cpu core count and number of videos
-    span = float(input('Enter SPAN value (HZ): '))
-    center = float(input('Enter CENTER value (GHZ): '))
-    dbPerHLine = int(input('Enter dB/horizontal line value: '))
+    
+    # span = float(input('Enter SPAN value (HZ): '))
+    # center = float(input('Enter CENTER value (GHZ): '))
+    # dbPerHLine = int(input('Enter dB/horizontal line value: '))
+
+    span = env_vars.Env_Vars.SPAN
+    center = env_vars.Env_Vars.center
+    dbPerHLine = env_vars.Env_Vars.dbPerHLine
 
     # Use multiprocessing.Pool to process videos in parallel, csn iterate through the list of videos and apply the video_file_worker function to each element
     with multiprocessing.Pool(processes=num_processes) as pool: #Creates a pool of worker processes and the parameter process is based on the number of worker processes
@@ -209,4 +215,5 @@ def main():
 # 5. Script entry point
 # ===================================
 if __name__ == "__main__":
-    main()
+    app = EnvVarEditor.EnvVarEditor() #Creates the GUI
+    app.mainloop()  # The main analysis starts when the user clicks "Start" in the GUI

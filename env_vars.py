@@ -2,6 +2,8 @@ import numpy as np
 
 class Env_Vars:
     SPAN = 1
+    center = 0
+    dbPerHLine = 0
     # User-configurable constants for color filtering
     LOWER_GREEN = np.array([33, 45, 45])
     UPPER_GREEN = np.array([92, 260, 260])
