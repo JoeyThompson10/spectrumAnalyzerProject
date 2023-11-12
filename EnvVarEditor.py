@@ -1,49 +1,78 @@
-import tkinter as tk # For creating the GUI
-from tkinter import simpledialog, colorchooser, ttk # For creating the GUI
-import env_vars # For editing environment variables
-import numpy as np # For color filtering
-import main # For running the main function
+import tkinter as tk
+from tkinter import ttk, filedialog, simpledialog, colorchooser
+import env_vars
+import numpy as np
+import main
+import os
 
-class EnvVarEditor(tk.Tk): # GUI for editing environment variables
-    def __init__(self): # Constructor for the GUI
-        super().__init__() # Call the constructor of the parent class
-        self.title("Spectrum Analyzer - Team 5") # Set the title of the window
-        self.geometry("400x600")  # Set a default size for the window
-        self.style = ttk.Style(self) # Create a style object
-        self.style.theme_use('clam') # Set the theme to 'clam' (a light theme)
-        self.create_widgets() # Create the widgets for the GUI
+class EnvVarEditor(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Spectrum Analyzer - Team 5")
+        self.create_main_page()
+        self.minsize(400, 600)  # Set a minimum size for the window
 
-    def create_widgets(self): # Create the widgets for the GUI
-        # Frame for the Start Analysis button
-        top_frame = ttk.Frame(self) 
-        top_frame.pack(padx=10, pady=10, fill='x')
-        ttk.Button(top_frame, text="Start Analysis", command=self.start_analysis).pack(fill='x', pady=5)
+    def create_main_page(self):
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(expand=True, fill=tk.BOTH)
 
-        # Frame for numeric and string variable editing
-        edit_frame = ttk.Frame(self)
-        edit_frame.pack(padx=10, pady=10, fill='x', expand=True)
-        self.create_edit_buttons(edit_frame)
+        ttk.Button(self.main_frame, text="Start Analysis", command=self.start_analysis).pack(pady=10, padx=10, fill=tk.X)
+        ttk.Button(self.main_frame, text="Settings", command=self.create_settings_page).pack(pady=10, padx=10, fill=tk.X)
 
-        # Frame for color variable editing
-        color_frame = ttk.Frame(self)
-        color_frame.pack(padx=10, pady=10, fill='x', expand=True)
-        self.create_color_buttons(color_frame)
+
+        # Get the count of video files in the specified folder
+        video_count = self.get_video_count()
+
+        # Display the count of videos
+        video_info_label = ttk.Label(self.main_frame, text=f"Number of Videos in Folder: {video_count}")
+        video_info_label.pack(pady=5, padx=10)
+
+    def get_video_count(self):
+        video_folder_path = env_vars.Env_Vars.VIDEO_FOLDER
+        if os.path.exists(video_folder_path):
+            video_files = [f for f in os.listdir(video_folder_path) if f.endswith('.mp4')]
+            return len(video_files)
+        else:
+            return 0
+
+    def create_settings_page(self):
+        self.clear_frame(self.main_frame)
+
+        settings_frame = ttk.Frame(self)
+        settings_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.create_edit_buttons(settings_frame)
+        self.create_color_buttons(settings_frame)
+
+        ttk.Button(settings_frame, text="Back to Main", command=lambda: self.switch_frame(settings_frame, self.create_main_page)).pack(pady=10, padx=10, fill=tk.X)
 
     def create_edit_buttons(self, parent):
-        # Buttons for editing numeric and string variables
-        ttk.Button(parent, text="Edit SPAN", command=self.edit_span).pack(fill='x', pady=5)
-        ttk.Button(parent, text="Edit Center", command=self.edit_center).pack(fill='x', pady=5)
-        ttk.Button(parent, text="Edit dbPerHLine", command=self.edit_dbPerHLine).pack(fill='x', pady=5)
-        ttk.Button(parent, text="Edit Video Path", command=self.edit_video_path).pack(fill='x', pady=5)
-        ttk.Button(parent, text="Edit Video Folder", command=self.edit_video_folder).pack(fill='x', pady=5)
-        ttk.Button(parent, text="Edit Quit Key", command=self.edit_quit_key).pack(fill='x', pady=5)
-        ttk.Button(parent, text="Edit Dilation Iterations", command=self.edit_dilate_iterations).pack(fill='x', pady=5)
-        ttk.Button(parent, text="Edit Erosion Iterations", command=self.edit_erode_iterations).pack(fill='x', pady=5)
+        button_labels = ["Edit SPAN", "Edit Center", "Edit dbPerHLine", "Edit Video Path", "Edit Video Folder", "Edit Quit Key", "Edit Dilation Iterations", "Edit Erosion Iterations"]
+        command_funcs = [self.edit_span, self.edit_center, self.edit_dbPerHLine, self.edit_video_path, self.edit_video_folder, self.edit_quit_key, self.edit_dilate_iterations, self.edit_erode_iterations]
+
+        for label, command in zip(button_labels, command_funcs):
+            ttk.Button(parent, text=label, command=command).pack(pady=5, padx=10, fill=tk.X)
 
     def create_color_buttons(self, parent):
         color_vars = ['LOWER_GREEN', 'UPPER_GREEN', 'LOWER_WAVE_COLOR', 'UPPER_WAVE_COLOR', 'LOWER_GRID_COLOR', 'UPPER_GRID_COLOR']
         for var in color_vars:
-            ttk.Button(parent, text=f"Edit {var}", command=lambda var_name=var: self.edit_color(var_name)).pack(fill='x', pady=5)
+            ttk.Button(parent, text=f"Edit {var}", command=lambda var_name=var: self.edit_color(var_name)).pack(pady=5, padx=10, fill=tk.X)
+
+    def switch_frame(self, current_frame, new_frame_func):
+        self.clear_frame(current_frame)
+        new_frame_func()
+
+    def clear_frame(self, frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
+        frame.pack_forget()
+
+    def edit_video_path(self):
+        file_path = filedialog.askopenfilename(title="Select Video File", filetypes=[("Video Files", "*.mp4 *.avi *.mov")])
+        if file_path:
+            setattr(env_vars.Env_Vars, 'VIDEO_PATH', file_path)
+        else:
+            self.edit_string_var('VIDEO_PATH', "Enter new video path:")
 
     def start_analysis(self):
         env_vars.save_settings() # Save the environment variables
@@ -94,5 +123,5 @@ class EnvVarEditor(tk.Tk): # GUI for editing environment variables
             setattr(env_vars.Env_Vars, color_var_name, new_color)
 
 if __name__ == "__main__":
-    app = EnvVarEditor() # Create the GUI
-    app.mainloop() # Run the GUI
+    app = EnvVarEditor()
+    app.mainloop()
