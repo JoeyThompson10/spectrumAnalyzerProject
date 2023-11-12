@@ -170,7 +170,7 @@ def video_to_csv_worker(video_file, span, center, dbPerHLine):
     fileName = current_time + "_CSV_" + fileName
     video_to_csv(cap, fileName, span, center, dbPerHLine)
 
-#Processes through the video files in the folder has new parameters from multiprocessing
+#This function is what each worker executes to process the video and uses the video_to_CSV to make the csv files
 def process_video_file_worker(video_file, span, center, dbPerHLine):
     full_video_path = os.path.join(env_vars.Env_Vars.VIDEO_FOLDER, video_file)
     print("Processing video: " + full_video_path)
@@ -197,14 +197,14 @@ def main():
     
     # # Process each video file
     # Set multiprocessing parameters
-    num_processes = min(multiprocessing.cpu_count(), len(video_files))
+    num_processes = min(multiprocessing.cpu_count(), len(video_files)) #Determines the number of process that can be used based off of cpu core count and number of videos
     span = float(input('Enter SPAN value (HZ): '))
     center = float(input('Enter CENTER value (GHZ): '))
     dbPerHLine = int(input('Enter dB/horizontal line value: '))
 
-    # Use multiprocessing.Pool to process videos in parallel
-    with multiprocessing.Pool(processes=num_processes) as pool: #Uses a pool.starmap to pass in multiple arguments to the worker function
-        pool.starmap(process_video_file_worker, [(video, span, center, dbPerHLine) for video in video_files])
+    # Use multiprocessing.Pool to process videos in parallel, csn iterate through the list of videos and apply the video_file_worker function to each element
+    with multiprocessing.Pool(processes=num_processes) as pool: #Creates a pool of worker processes and the parameter process is based on the number of worker processes
+        pool.starmap(process_video_file_worker, [(video, span, center, dbPerHLine) for video in video_files]) #starmap is used to apply video_file_worker to each element and each element is a tuple containing the video file name and the new parameters
 # ===================================
 # 5. Script entry point
 # ===================================
