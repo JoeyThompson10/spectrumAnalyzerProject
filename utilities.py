@@ -21,12 +21,21 @@ class Utilities:
             edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
 
-        return contours
+        return contours, np.where(mask)
     
-    def getPixtoDb(px_value, span, gridheight): 
-        dbPxHeight = (gridheight)/span
+    def getAmplitude(px_value, dbPerHLine, gridheight): 
+        dbPxHeight = (gridheight)/(dbPerHLine*10)
         wave_amplitude = px_value/dbPxHeight
         return wave_amplitude
+    
+    def getCenterFreq(center_freq_px, span, center, gridwidth, center_x): 
+        
+        hzPxWidth = gridwidth/(span) # get width of 1HZ
+        print(f"center_x: {center_x} px")
+        print(f"center_freq_px: {center_freq_px} px")
+        deviation_px = center_x - center_freq_px # get the deviation of the center frequency pixel value from the center line's x value
+        center_freq = center+(deviation_px/hzPxWidth)*0.001 # convert the deviation in pixels to HZ and add to the center (eg 1GHZ) to find center frequency
+        return center_freq
 
     def parabola(x, a, b, c):
         """Defines a parabolic function."""
@@ -34,6 +43,8 @@ class Utilities:
 
     def apply_color_filter(frame, lower_bound, upper_bound):
         """Apply a color filter based on RGB lower and upper bounds."""
+        if not isinstance(lower_bound, np.ndarray) or not isinstance(upper_bound, np.ndarray):
+            raise TypeError("Color bounds must be numpy arrays")
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, lower_bound, upper_bound)
         return mask
@@ -52,9 +63,14 @@ class Utilities:
         )
         largest_contour = Utilities.find_largest_contour(mask)
 
+        # Check if the largest contour is not None and has a size greater than 0
         if largest_contour is not None and largest_contour.size > 0:
             mask = np.zeros_like(mask)
             cv2.drawContours(mask, [largest_contour], -1, (255), thickness=cv2.FILLED)
+
+            # Check if KERNEL_SIZE is a NumPy array and raise an error if not
+            if not isinstance(env_vars.Env_Vars.KERNEL_SIZE, np.ndarray): 
+                raise TypeError("KERNEL_SIZE must be a numpy array") 
 
             # Connect nearby contours by dilating and then eroding
             mask = cv2.dilate(
@@ -67,17 +83,27 @@ class Utilities:
                 env_vars.Env_Vars.KERNEL_SIZE,
                 iterations=env_vars.Env_Vars.ERODE_ITERATIONS,
             )
+        # find the leftmost point of the mask 
         leftmost_x = None
+        rightmost_x = None
         leftmost_y = None
         for point in largest_contour:
             x, y = point[0]
+            x2, y2 = point[len(point)-1]
             if leftmost_x is None or x < leftmost_x:
                 leftmost_x = x
                 leftmost_y = y
-        return mask, np.where(mask), leftmost_x, leftmost_y
+            if rightmost_x is None or x2 > rightmost_x:
+                rightmost_x = x2
+        
+        center_x = (rightmost_x+leftmost_x)/2
+        mask_width = rightmost_x-leftmost_x
+        return mask, np.where(mask), leftmost_x, leftmost_y, center_x, mask_width
 
-    def process_wave(frame, mask, span, gridheight, wave_x, wave_y, leftmost_x, leftmost_y, initial_y):
+    def process_wave(frame, mask, span, center, dbPerHLine, gridheight, wave_x, wave_y, initial_x, leftmost_y, initial_y, gridwidth, center_x):
         """Analyze and extract wave characteristics."""
+        print(f"wave_x: {wave_x} px")
+        print(f"wave_y: {wave_y} px")
         if len(wave_x) > 0 and len(wave_y) > 0:
             # Fit the points to a parabola
             params, _ = curve_fit(Utilities.parabola, wave_x, wave_y)
@@ -85,12 +111,15 @@ class Utilities:
         # Extract the coefficients of the fitted parabola
         a, b, c = params
 
-        # Calculate center frequency using vertex formula (-b / 2a)
-        center_freq_px = -b / (2 * (a-leftmost_x))
-        center_freq = Utilities.getPixtoDb(center_freq_px, span, gridheight)
+       
+
         if(leftmost_y < (initial_y+initial_y*0.1)):
+             # Calculate center frequency using vertex formula (-b / 2a)
+            center_freq_px = -b/ (2 * a)  # x coorinate of the vertex of the wave
+            
+            center_freq = Utilities.getCenterFreq(center_freq_px, span, center, gridwidth, center_x)
             mask_height = Utilities.get_mask_height(mask, initial_y) #pixel height of the mask
-            amplitude = Utilities.getPixtoDb(mask_height, span, gridheight)
+            amplitude = Utilities.getAmplitude(mask_height, dbPerHLine, gridheight)
             return center_freq, amplitude
 
 
@@ -101,9 +130,7 @@ class Utilities:
         if non_zero_rows.size > 0:
             # Calculate the minimum and maximum row indices to find the height
             min_row = np.min(non_zero_rows)
-            print(f"min row: {min_row} px")
             max_row = initial_y
-            print(f"max row: {max_row} px")
             # Calculate the height as the difference between max and min rows
             height = (
                 max_row - min_row + 1
