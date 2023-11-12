@@ -7,7 +7,7 @@ import main # For running the main function
 class EnvVarEditor(tk.Tk): # GUI for editing environment variables
     def __init__(self): # Constructor for the GUI
         super().__init__() # Call the constructor of the parent class
-        self.title("Environment Variable Editor") # Set the title of the window
+        self.title("Spectrum Analyzer - Team 5") # Set the title of the window
         self.geometry("400x600")  # Set a default size for the window
         self.style = ttk.Style(self) # Create a style object
         self.style.theme_use('clam') # Set the theme to 'clam' (a light theme)
