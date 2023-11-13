@@ -6,7 +6,6 @@ import main
 import os
 import threading
 
-
 # Class for creating tooltips
 class Tooltip:
     # Initialize the tooltip
@@ -122,7 +121,7 @@ class SpectrumAnalyzerGUI(tk.Tk):
 
         ttk.Button(
             settings_frame,
-            text="Back to Main",
+            text="Back",
             command=lambda: self.switch_frame(settings_frame, self.create_main_page),
         ).pack(pady=10, padx=10, fill=tk.X)
 
@@ -255,13 +254,36 @@ class SpectrumAnalyzerGUI(tk.Tk):
         # Make the text widget read-only
         help_text_widget.config(state="disabled")
 
-    # Start the analysis
     def start_analysis(self):
+        # Disable the GUI and update the title
+        self.toggle_gui_state(disabled=True)
+        self.title("Spectrum Analyzer - Analyzing...")
         env_vars.save_settings()
 
-        self.destroy()
+        # Run the analysis in a separate thread - this is not working
+        analysis_thread = threading.Thread(target=self.run_analysis)
+        analysis_thread.start()
+
+    def run_analysis(self):
+        # Run the analysis
         main.main()
 
+        # Re-enable the GUI and update the title after analysis
+        self.toggle_gui_state(disabled=False)
+        self.title("Spectrum Analyzer - Team 5")
+
+    def toggle_gui_state(self, disabled):
+        state = 'disabled' if disabled else 'normal'
+        for widget in self.main_frame.winfo_children():
+            if isinstance(widget, ttk.Button):
+                widget.configure(state=state)
+
+        # Update window title instead of changing frame background
+        if disabled:
+            self.title("Spectrum Analyzer - Analyzing...")
+        else:
+            self.title("Spectrum Analyzer - Team 5")
+            
     # Methods for editing numeric and string variables
     def edit_span(self):
         self.edit_numeric_var("SPAN", "Enter new SPAN value:")
@@ -350,3 +372,4 @@ class SpectrumAnalyzerGUI(tk.Tk):
 if __name__ == "__main__":
     app = SpectrumAnalyzerGUI()
     app.mainloop()
+    app.destroy()
