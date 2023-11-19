@@ -309,6 +309,9 @@ class SpectrumAnalyzerGUI(tk.Tk):
         # Disable the GUI and update the title
         self.toggle_gui_state(disabled=True)
         self.title("Spectrum Analyzer - Analyzing...")
+
+        self.add_quit_label()
+
         env_vars.save_settings()
 
         # Run the analysis in a separate thread - this is not working
@@ -334,7 +337,25 @@ class SpectrumAnalyzerGUI(tk.Tk):
             self.title("Spectrum Analyzer - Analyzing...")
         else:
             self.title("Spectrum Analyzer - Team 5")
+            # removes instructions to quit the analysis to the greyed out GUI
+            self.destroy_quit_label()
             
+    # adds instructions to quit the analysis to the greyed out GUI
+    def add_quit_label(self):
+        ttk.Label(
+            self.main_frame,
+            text="Press the Q key to quit the analysis",
+            foreground="red",
+        ).pack(pady=10, padx=10, fill=tk.X)
+
+    # removes instructions to quit the analysis to the greyed out GUI
+    def destroy_quit_label(self):
+        for widget in self.main_frame.winfo_children():
+                if isinstance(widget, ttk.Label):
+                    if widget.cget("text") == "Press the Q key to quit the analysis":
+                        widget.destroy()
+
+
     # Methods for editing numeric and string variables
     def edit_span(self):
         self.edit_numeric_var("SPAN", "Enter new SPAN value:")
