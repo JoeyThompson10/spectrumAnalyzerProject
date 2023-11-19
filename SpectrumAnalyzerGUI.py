@@ -1,10 +1,12 @@
 import tkinter as tk
+from PIL import Image, ImageTk
 from tkinter import ttk, filedialog, simpledialog, colorchooser
 import env_vars
 import numpy as np
 import main
 import os
 import threading
+import cv2
 
 # Class for creating tooltips
 class Tooltip:
@@ -56,6 +58,16 @@ class SpectrumAnalyzerGUI(tk.Tk):
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(expand=True, fill=tk.BOTH)
 
+        # Paned window for frame display by gui
+        paned_window = ttk.PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
+        paned_window.pack(fill=tk.BOTH, expand=True)
+
+        left_frame = ttk.Frame(paned_window)
+        paned_window.add(left_frame, weight=1)
+
+        self.right_frame = ttk.Frame(paned_window)
+        paned_window.add(self.right_frame, weight=1)
+
         # Main label with the application title
         ttk.Label(
             self.main_frame, text="Spectrum Analyzer - Team 5", font=("Helvetica", 16)
@@ -63,22 +75,22 @@ class SpectrumAnalyzerGUI(tk.Tk):
 
         # Welcome label
         ttk.Label(
-            self.main_frame,
+            left_frame,
             text="Welcome to the Spectrum Analyzer application.\nPlease select an option below to get started.",
         ).pack(pady=10, padx=10, fill=tk.X)
 
         # Button to start analysis
         ttk.Button(
-            self.main_frame, text="Start Analysis", command=self.start_analysis
+            left_frame, text="Start Analysis", command=self.start_analysis
         ).pack(pady=10, padx=10, fill=tk.X)
 
         # Button to open settings
         ttk.Button(
-            self.main_frame, text="Settings", command=self.create_settings_page
+            left_frame, text="Settings", command=self.create_settings_page
         ).pack(pady=10, padx=10, fill=tk.X)
 
         # Help/Guide button
-        ttk.Button(self.main_frame, text="Help/Guide", command=self.show_help).pack(
+        ttk.Button(left_frame, text="Help/Guide", command=self.show_help).pack(
             pady=10, padx=10, fill=tk.X
         )
 
@@ -98,6 +110,45 @@ class SpectrumAnalyzerGUI(tk.Tk):
             side="bottom", pady=30, padx=10, fill=tk.X
         )
 
+        # Image frame set up
+        self.image_label = ttk.Label(self.right_frame)
+
+        self.display_video_frame()
+        self.update()
+
+    def display_video_frame(self):
+        video_folder_path = env_vars.Env_Vars.VIDEO_FOLDER
+        video_files = [f for f in os.listdir(video_folder_path) if f.endswith('.mp4')]
+
+        if video_files:
+            video_path = os.path.join(video_folder_path, video_files[0])
+            video_capture = cv2.VideoCapture(video_path)
+
+            if video_capture.isOpened():
+                ret, frame = video_capture.read()
+                if ret:
+                    # Convert the color from BGR to RGB
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    # Convert to PIL format
+                    frame_image = Image.fromarray(frame)
+                    # Convert to ImageTk format
+                    baseheight = 400
+                    hpercent = (baseheight / float(frame_image.size[1]))
+                    wsize = int((float(frame_image.size[0]) * float(hpercent)))
+                    frame_image = frame_image.resize((wsize, baseheight), Image.Resampling.LANCZOS)
+                    frame_image = ImageTk.PhotoImage(frame_image)
+
+                    # Assuming you have a label to display the image
+                    self.image_label.configure(image=frame_image)
+                    self.image_label.image = frame_image  # Keep a reference!
+                    self.image_label.pack(pady=10, padx=10)
+                else:
+                    print("Failed to read a frame from the video")
+            else:
+                print("Failed to open video file")
+        else:
+            print("No video files found")
+    
     # Get the number of videos in the video folder
     def get_video_count(self):
         video_folder_path = env_vars.Env_Vars.VIDEO_FOLDER
