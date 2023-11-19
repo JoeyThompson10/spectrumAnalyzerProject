@@ -1,9 +1,48 @@
-Installation Instructions:
+# Spectrum Analyzer Project
 
-Navigate to the project directory where the SpectrumAnalyzerGUI.py file is located.
-Open a terminal or command prompt in this directory.
-Ensure you have Python installed on your system and the necessary libraries by running pip install -r requirements.txt (the requirements file should list all the necessary libraries).
-Run the application by executing python SpectrumAnalyzerGUI.py in the terminal. (main.py will also run, but without a GUI)
-Note: You can find detailed instructions and documentation on how to set up and run the project on the project's website: https://main.d21hsol1os28ah.amplifyapp.com/
+## Team Members
+- Masood Afzal
+- Ashly Altman
+- Brooke Ebetino
+- Tyler Halley
+- Joey Thompson
 
-https://github.com/JoeyThompson10/spectrumAnalyzerProject
+## Introduction
+This is the Spectrum Analyzer Analysis Tool developed by Team 5 for SWE 4724 - Software Engineering Project, under the guidance of Dr. Yan Huang. The tool is designed to analyze spectrums in video files and generate insightful data.
+
+## Installation Instructions
+
+### Prerequisites
+- Ensure Python is installed on your system.
+- Download the project files or clone the repository.
+
+### Setting Up
+1. **Navigate to the project directory** where `SpectrumAnalyzerGUI.py` is located.
+2. **Open a terminal or command prompt** in this directory.
+3. **Install required libraries** using the command:
+
+pip install -r requirements.txt
+
+
+The `requirements.txt` file lists all necessary libraries.
+
+### Running the Application
+- To run the application with the GUI, execute:
+
+python SpectrumAnalyzerGUI.py
+
+
+- You can also run `main.py` for a non-GUI version.
+
+## Application Overview
+
+### GUI Features
+- **Start Analysis**: Processes video files and generates data.
+- **Settings**: Customize application settings like video paths and analysis parameters.
+- **Help/Guide**: Access instructions and support.
+
+## Project Context
+This is part of a class project for SWE 4724. The application is currently in a developmental stage and may receive updates in the future.
+
+## Support
+For support or queries, please contact any team member.
