@@ -50,16 +50,34 @@ class SpectrumAnalyzerGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Spectrum Analyzer - Team 5")
-        self.create_main_page()
-        self.minsize(400, 600)  # Set a minimum size for the window
-
-    # Create the main page
-    def create_main_page(self):
+        
+        # Main frame that will hold everything
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(expand=True, fill=tk.BOTH)
 
+        # Create a dedicated frame for the video display
+        self.video_frame = ttk.Frame(self.main_frame)
+        self.video_frame.pack(side="left", fill=tk.Y, expand=False)
+        self.create_video_display()
+
+        # Frame for changing screens (settings, main page, etc.)
+        self.screen_frame = ttk.Frame(self.main_frame)
+        self.screen_frame.pack(side="right", fill=tk.BOTH, expand=True)
+
+        self.create_main_page()  # Create the main page in the screen frame
+
+    def create_video_display(self):
+        # This function should only be called once to set up the video display initially
+        self.image_label = ttk.Label(self.video_frame)
+        self.display_video_frame()  # Function to update the video frame
+        self.image_label.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+
+    # Create the main page
+    def create_main_page(self):
+        self.clear_frame(self.screen_frame)
+
         # Paned window for frame display by gui
-        paned_window = ttk.PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
+        paned_window = ttk.PanedWindow(self.screen_frame, orient=tk.HORIZONTAL)
         paned_window.pack(fill=tk.BOTH, expand=True)
 
         left_frame = ttk.Frame(paned_window)
@@ -70,7 +88,7 @@ class SpectrumAnalyzerGUI(tk.Tk):
 
         # Main label with the application title
         ttk.Label(
-            self.main_frame, text="Spectrum Analyzer - Team 5", font=("Helvetica", 16)
+            left_frame, text="Spectrum Analyzer - Team 5", font=("Helvetica", 16)
         ).pack(pady=10, padx=10, fill=tk.X)
 
         # Welcome label
@@ -97,21 +115,18 @@ class SpectrumAnalyzerGUI(tk.Tk):
         # Label showing the number of videos
         video_count = self.get_video_count()
         video_info_label = ttk.Label(
-            self.main_frame, text=f"Number of Videos in Folder: {video_count}"
+            left_frame, text=f"Number of Videos in Folder: {video_count}"
         )
         video_info_label.pack(pady=5, padx=10)
 
         # Create a bottom frame for the Exit button
-        bottom_frame = ttk.Frame(self.main_frame)
+        bottom_frame = ttk.Frame(left_frame)
         bottom_frame.pack(side="bottom", fill=tk.X, expand=False)
 
         # Exit button at the bottom
         ttk.Button(bottom_frame, text="Exit", command=self.destroy).pack(
             side="bottom", pady=30, padx=10, fill=tk.X
         )
-
-        # Image frame set up
-        self.image_label = ttk.Label(self.right_frame)
 
         self.display_video_frame()
         self.update()
@@ -162,9 +177,9 @@ class SpectrumAnalyzerGUI(tk.Tk):
         
     # Create the settings page
     def create_settings_page(self):
-        self.clear_frame(self.main_frame)
+        self.clear_frame(self.screen_frame)
 
-        settings_frame = ttk.Frame(self)
+        settings_frame = ttk.Frame(self.screen_frame)  # Use self.screen_frame here
         settings_frame.pack(expand=True, fill=tk.BOTH)
 
         self.create_edit_buttons(settings_frame)
@@ -248,7 +263,6 @@ class SpectrumAnalyzerGUI(tk.Tk):
     def clear_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()
-        frame.pack_forget()
 
     # Show the help/guide window
     def show_help(self):
