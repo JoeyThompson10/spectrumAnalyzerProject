@@ -135,8 +135,8 @@ def video_to_csv(cap, fileName, span, center, dbPerHLine):
         sleep(5)
 
     finally:
-        # Store detected signals' information to a CSV file
-        csv_file = fileName + ".csv"
+        # Store detected signals' information to a CSV file after removing mp4 extension from the video file name
+        csv_file = fileName.replace('.mp4', '.csv')
 
         # Check if the Completed folder exists, if not, create it
         completed_directory = 'Completed'
