@@ -4,13 +4,13 @@ import os
 
 class Env_Vars:
     SPAN = 1
-    center = 0
-    dbPerHLine = 0
+    center = 1
+    dbPerHLine = 1
     # User-configurable constants for color filtering
     LOWER_GREEN = np.array([33, 45, 45])
-    UPPER_GREEN = np.array([92, 260, 260])
+    UPPER_GREEN = np.array([92, 255, 255])
     LOWER_WAVE_COLOR = np.array([78, 145, 115])
-    UPPER_WAVE_COLOR = np.array([102, 260, 260])
+    UPPER_WAVE_COLOR = np.array([102, 255, 255])
 
     LOWER_GRID_COLOR = np.array([31, 41, 41])
     UPPER_GRID_COLOR = np.array([78, 145, 115])
