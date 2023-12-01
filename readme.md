@@ -21,7 +21,7 @@ This is the Spectrum Analyzer Analysis Tool developed by Team 5 for SWE 4724 - S
 2. **Open a terminal or command prompt** in this directory.
 3. **Install required libraries** using the command:
 
-pip install -r requirements.txt
+```pip install -r requirements.txt```
 
 
 The `requirements.txt` file lists all necessary libraries.
@@ -29,10 +29,8 @@ The `requirements.txt` file lists all necessary libraries.
 ### Running the Application
 - To run the application with the GUI, execute:
 
-python SpectrumAnalyzerGUI.py
+```python SpectrumAnalyzerGUI.py```
 
-
-- You can also run `main.py` for a non-GUI version.
 
 ## Application Overview
 
