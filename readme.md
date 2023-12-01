@@ -1,7 +1,7 @@
 # Spectrum Analyzer Project
 
 ## Team Members
-- Masood Afzal
+- Masood Afzali
 - Ashly Altman
 - Brooke Ebetino
 - Tyler Halley
