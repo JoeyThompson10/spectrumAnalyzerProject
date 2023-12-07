@@ -160,7 +160,7 @@ def video_to_csv(cap, fileName, span, center, dbPerHLine):
                     max_amplitude = signal
 
                     # writer.writerow([timestamp, center_freq, min_amplitude, max_amplitude, center_amplitude])
-                    writer.writerow([timestamp, max_amplitude])
+                    writer.writerow([timestamp, max_amplitude[0], max_amplitude[1], max_amplitude[2], max_amplitude[3]])
 
             print("CSV file created successfully.")
         except Exception as e:
