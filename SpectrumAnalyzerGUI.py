@@ -17,7 +17,7 @@ class Tooltip:
         self.tooltip_window = None
         widget.bind("<Enter>", self.enter)
         widget.bind("<Leave>", self.leave)
-
+            
     # Create the tooltip window
     def enter(self, event=None):
         x = y = 0
@@ -65,6 +65,16 @@ class SpectrumAnalyzerGUI(tk.Tk):
         self.screen_frame.pack(side="right", fill=tk.BOTH, expand=True)
 
         self.create_main_page()  # Create the main page in the screen frame
+
+        # Protocol handler for window close event
+        self.protocol("WM_DELETE_WINDOW", self.safe_close)
+
+    # Method to safely close the application
+    def safe_close(self):
+        #
+
+        if self.winfo_exists():  # Check if the window exists
+            self.destroy()  # Destroy the window
 
     def create_video_display(self):
         # This function should only be called once to set up the video display initially
@@ -133,6 +143,12 @@ class SpectrumAnalyzerGUI(tk.Tk):
 
     def display_video_frame(self):
         video_folder_path = env_vars.Env_Vars.VIDEO_FOLDER
+
+        # Check if the video folder exists, and if not, create it
+        if not os.path.exists(video_folder_path):
+            os.makedirs(video_folder_path)
+
+        # Get the first video file in the folder
         video_files = [f for f in os.listdir(video_folder_path) if f.endswith('.mp4')]
 
         if video_files:
@@ -162,8 +178,15 @@ class SpectrumAnalyzerGUI(tk.Tk):
             else:
                 print("Failed to open video file")
         else:
-            print("No video files found")
+            print("Failed to open video file")
+            self.image_label.config(text="No videos found in the video folder.\nClick here to open the video folder.",
+                                    cursor="hand2")
+            self.image_label.bind("<Button-1>", lambda e: self.open_video_folder(video_folder_path))
     
+    def open_video_folder(self, path):
+        import webbrowser
+        webbrowser.open(path)
+
     # Get the number of videos in the video folder
     def get_video_count(self):
         video_folder_path = env_vars.Env_Vars.VIDEO_FOLDER
@@ -458,4 +481,4 @@ class SpectrumAnalyzerGUI(tk.Tk):
 if __name__ == "__main__":
     app = SpectrumAnalyzerGUI()
     app.mainloop()
-    app.destroy()
+    # app.safe_close()
